@@ -108,17 +108,17 @@ class AWNN(object):
         self,
         *,
         C=1.0,
-        cv_sampling="auto",
         metric="euclidean",
         leaf_size=40,
         epsilon=1e-9,
+        seed=1
         
     ):
-        self.cv_sampling = cv_sampling
         self.C = C
         self.metric = metric
         self.leaf_size=leaf_size
         self.epsilon=epsilon
+        self.seed=seed
         
         if metric not in KDTree.valid_metrics:
             raise ValueError("invalid metric: '{0}'".format(metric))
@@ -156,7 +156,62 @@ class AWNN(object):
         self.n_train=X.shape[0]
         self.vol_unitball=math.pi**(self.dim/2)/math.gamma(self.dim/2+1)
         self.max_neighbors=int(X.shape[0]**(2/3))
+        self.score_validate_scale=self.n_train*self.dim**2
         return self
+    
+    
+    def get_params(self, deep=True):
+        """Get parameters for this estimator.
+
+        Parameters
+        ----------
+        deep : boolean, optional
+            If True, will return the parameters for this estimator and
+            contained subobjects that are estimators.
+
+        Returns
+        -------
+        params : mapping of string to any
+            Parameter names mapped to their values.
+        """
+        out = dict()
+        for key in ['C']:
+            value = getattr(self, key, None)
+            if deep and hasattr(value, 'get_params'):
+                deep_items = value.get_params().items()
+                out.update((key + '__' + k, val) for k, val in deep_items)
+            out[key] = value
+        return out
+    
+    def set_params(self, **params):
+        """Set the parameters of this estimator.
+
+        The method works on simple estimators as well as on nested objects
+        (such as pipelines). The latter have parameters of the form
+        ``<component>__<parameter>`` so that it's possible to update each
+        component of a nested object.
+
+        Returns
+        -------
+        self
+        """
+        if not params:
+            # Simple optimization to gain speed (inspect is slow)
+            return self
+        valid_params = self.get_params(deep=True)
+
+
+        for key, value in params.items():
+            if key not in valid_params:
+                raise ValueError('Invalid parameter %s for estimator %s. '
+                                 'Check the list of available parameters '
+                                 'with `estimator.get_params().keys()`.' %
+                                 (key, self))
+            setattr(self, key, value)
+            valid_params[key] = value
+
+        return self
+
 
     def score_samples(self, X):
         """Compute the log-likelihood of each sample under the model.
@@ -178,34 +233,88 @@ class AWNN(object):
         
         
         # est weight
-        self.estAlpha=np.zeros([n_test,self.max_neighbors])
-        self.log_density=np.zeros(n_test)
+        estAlpha=np.zeros([n_test,self.max_neighbors])
+        log_density=np.zeros(n_test)
         
         for i in range(n_test):
-            distance_vec,_=self.tree_.query(X[i].reshape(1,-1),self.max_neighbors)
-            distance_vec=distance_vec[distance_vec>0]
+            distance_vec,_=self.tree_.query(X[i].reshape(1,-1),self.max_neighbors+1)
+            distance_vec=distance_vec[0]
+            if distance_vec[0]==0:
+                distance_vec=distance_vec[1:]
+            else:
+                distance_vec=distance_vec[:-1]
             beta=self.C*distance_vec
             
+            
         
-            self.estAlpha[i,:],alphaIndexMax=weight_selection(beta)
+            estAlpha[i,:],alphaIndexMax=weight_selection(beta)
                 
-            density_num=np.array([k for k in range(1,alphaIndexMax+1)]).dot(self.estAlpha[i,:alphaIndexMax])
-            density_den=np.array([distance_vec[:alphaIndexMax]**self.dim]).dot(self.estAlpha[i,:alphaIndexMax])
+            density_num=np.array([k for k in range(1,alphaIndexMax+1)]).dot(estAlpha[i,:alphaIndexMax])
+            density_den=np.array([distance_vec[:alphaIndexMax]**self.dim]).dot(estAlpha[i,:alphaIndexMax])
             
             if density_num==0:
-                self.log_density[i]=np.log(self.epsilon)
+                log_density[i]=np.log(self.epsilon)
             else:
-                self.log_density[i] = np.log(density_num)-np.log(density_den)
+                log_density[i] = np.log(density_num)-np.log(density_den)
             
-        self.log_density-=np.log(self.n_train*self.vol_unitball)
+        log_density-=np.log(self.n_train*self.vol_unitball)
             
         
-        return self.log_density
+        return log_density,estAlpha
     
     
     def predict(self,X,y=None):
+        self.log_density,self.estAlpha=self.score_samples(X)
+        return self.log_density,self.estAlpha
+    
+    
+    def compute_KL(self,X):
+        """Compute the KL statistic of given parameter.
+
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            List of n_features-dimensional data points.  Each row
+            corresponds to a single data point.
+
+        y : None
+            Ignored. This parameter exists only for compatibility with
+            :class:`~sklearn.pipeline.Pipeline`.
+
+        Returns
+        -------
+        logprob : float
+            Total log-likelihood of the data in X. This is normalized to be a
+            probability density, so the value will be low for high-dimensional
+            data.
+        """
+        X_validate,mass=grid_sampling(X,nsample=self.score_validate_scale,seed=self.seed)
+        validate_log_density,_=self.score_samples(X_validate)
         
-        return self.score_samples(X)
+        
+        '''
+        int_est=0
+        
+        for i in range(self.score_validate_scale):
+            distance_vec,_=self.tree_.query(X_validate[i].reshape(1,-1),self.max_neighbors)
+            beta=self.C*distance_vec[0]
+            #print(beta)
+    
+            estAlpha,alphaIndexMax=weight_selection(beta)
+                
+            density_num=np.array([k for k in range(1,alphaIndexMax+1)]).dot(estAlpha[:alphaIndexMax])
+            density_den=np.array([distance_vec[0][:alphaIndexMax]**self.dim]).dot(estAlpha[:alphaIndexMax])
+            
+            if density_num==0:
+                pass
+            else:
+                int_est+=density_num/density_den[0]/self.n_train/self.vol_unitball
+                
+           ''' 
+        log_density,_=self.score_samples(X)
+        
+                
+        return log_density.mean()-mass*np.exp(validate_log_density).mean()
 
     def score(self, X, y=None):
         """Compute the total log-likelihood under the model.
@@ -227,7 +336,15 @@ class AWNN(object):
             probability density, so the value will be low for high-dimensional
             data.
         """
-        return self.log_density.mean()
+        
+        return self.compute_KL(X)
+                
+                
+            
+                
+        
+        
+        
     
     
 
