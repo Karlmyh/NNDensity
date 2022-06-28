@@ -1,5 +1,5 @@
 """
-Adaptive Weighted Nearest Neighbor Density Estimation
+Nearest Neighbor Based Density Estimation
 -----------------------------------------------------
 """
 
@@ -7,19 +7,26 @@ import numpy as np
 import math
 from sklearn.neighbors import KDTree
 
-from ._utils import mc_sampling,weight_selection
+from ._utils import mc_sampling,knn,wknn,aknn
 
 
-class AWNN(object):
-    """AWNN
+class KNN(object):
+    """Nearest Neighbor Based Density Estimation
 
-    Read more in Adaptive Weighted Nearest Neighbor Density Estimation
+    Incorporate k-NN density estimation (KNN), weighted k-NN density estimaton 
+    (WKNN) and adaptive k-NN density estimation (AKNN). See reference. 
 
     Parameters
     ----------
-    C : float, default=1.0.
-        The tuning parameter in AWNN which controls the optimized weights. 
-
+    k : int, default=2
+        Number of neighbors to consider in estimaton. 
+        
+    threshold_r : float, default= 0.5
+        Threshold paramerter in AKNN to identify tail instances. 
+        
+    threshold_num: int, default= 5
+        Threshold paramerter in AKNN to identify tail instances. 
+        
     metric : str, default='euclidean'.
         The distance metric to use.  Note that not all metrics are
         valid with all algorithms.  Refer to the documentation of
@@ -45,9 +52,7 @@ class AWNN(object):
         concentrated.Use "heavy_tail" or "mixed" if data is heavy tailed 
         but pay attention to numerical instability. See .utils for detail. 
     
-    cut_off : int, default=5.
-        Number of neighbors for cutting AWNN to KNN. 
-
+   
     Attributes
     ----------
     n_train_ : int
@@ -61,9 +66,6 @@ class AWNN(object):
 
     vol_unitball_ : float
         Volume of dim_ dimensional unit ball.
-        
-    max_neighbors_: int, default= n_train_ ** 2/3.
-        Maximum number of neighbors quried from KDTree. 
 
     score_validate_scale_: int, default= 2 * n_train_ * dim_.
         Number of points used to estimate integration of estimator.
@@ -71,46 +73,59 @@ class AWNN(object):
     log_density: array-like of shape (n_test, ).
         Estimated log-density of test samples.
     
-    estAlpha: array-like of shape (n_test, n_train_ ).
-        Estimated weights of test samples.
 
     See Also
     --------
     sklearn.neighbors.KDTree : K-dimensional tree for fast generalized N-point
         problems.
+    
+    Reference
+    ---------
+    Sanjoy Dasgupta and Samory Kpotufe. Optimal rates for k-nn density and mode 
+    estimation. Advances in Neural Information Processing Systems, 27, 2014.
+    
+    Gérard Biau, Frédéric Chazal, David Cohen-Steiner, Luc Devroye, and Carlos 
+    Rodríguez. A weighted k-nearest neighbor density estimate for geometric 
+    inference. Electronic Journal of Statistics, 5(none):204 – 237, 2011. 
+    doi: 10.1214/11-EJS606. URL https://doi.org/ 10.1214/11-EJS606.
+
+    Puning Zhao and Lifeng Lai. Analysis of knn density estimation, 2020.
 
     Examples
     --------
-    Compute a AWNN density estimate with a fixed C.
+    Compute a WKNN density estimate with a fixed C.
 
-    >>> from AWNN import AWNN
+    >>> from KNN import KNN
     >>> import numpy as np
     >>> X_train = np.random.rand(2000).reshape(-1,2)
     >>> X_test = np.random.rand(6).reshape(-1,2)
-    >>> AWNN_model = AWNN(C=1).fit(X_train)
-    >>> log_density,_ = AWNN_model.score_samples(X_test)
+    >>> WKNN_model = KNN(k=100).fit(X_train,method="KNN")
+    >>> log_density = WKNN_model.score_samples(X_test)
     >>> log_density
-    array([ 0.10367955, -0.01632248,  0.06320222])
+    array([ 0.10936768, -0.04164363, -0.27935619])
     """
 
     def __init__(
-        self,
-        *,
-        C=1.0,
-        metric="euclidean",
-        leaf_size=40,
-        seed=1,
-        score_criterion="MISE",
-        sampling_stratigy="bounded",
-        cut_off=5
+                self,
+                *,
+                k=2,
+                threshold_r=0.5,
+                threshold_num=5,
+                metric="euclidean",
+                leaf_size=40,   
+                seed=1,
+                score_criterion="MISE",
+                sampling_stratigy="bounded"
     ):
-        self.C = C
+        
+        self.k=k
+        self.threshold_num=threshold_num
+        self.threshold_r=threshold_r
         self.metric = metric
         self.leaf_size=leaf_size
         self.seed=seed
         self.score_criterion=score_criterion
         self.sampling_stratigy=sampling_stratigy
-        self.cut_off=cut_off
         
         if metric not in KDTree.valid_metrics:
             raise ValueError("invalid metric: '{0}'".format(metric))
@@ -120,7 +135,7 @@ class AWNN(object):
 
 
     def fit(self, X, y=None,
-            max_neighbors="auto",
+            method="KNN",
             score_validate_scale="auto"):
         """Fit the AWNN on the data.
 
@@ -134,41 +149,34 @@ class AWNN(object):
             Ignored. This parameter exists only for compatibility with
             :class:`~sklearn.pipeline.Pipeline`.
             
-        max_neighbors: "auto" or int, default="auto".
-            Scale of first step query in AWNN for efficiency. Set to n**(2/3)
-            if auto.
+        method: {"KNN","WKNN","AKNN"}, default="KNN".
+            NN method to use. 
             
         score_validate_scale: "auto" or int, default="auto".
             Inportance sampling scale. Set to 2*n_train_*dim if auto.
-
 
         Returns
         -------
         self : object
             Returns the instance itself.
         """
-
+        
         self.tree_ = KDTree(
             X,
             metric=self.metric,
             leaf_size=self.leaf_size,
         )
-        
         self.dim_=X.shape[1]
         self.n_train_=X.shape[0]
         self.vol_unitball_=math.pi**(self.dim_/2)/math.gamma(self.dim_/2+1)
         
-        if max_neighbors=="auto":
-            # generally enough with 1e4
-            self.max_neighbors_=min(int(X.shape[0]**(2/3)),10000)
-        else:
-            self.max_neighbors_=max_neighbors
-            
+        
         if score_validate_scale=="auto":
             self.score_validate_scale_=self.n_train_*(self.dim_*2)
         else:
             self.score_validate_scale_=score_validate_scale
         
+        self.method_ = method
         return self
     
     
@@ -187,14 +195,13 @@ class AWNN(object):
             Parameter names mapped to their values.
         """
         out = dict()
-        for key in ['C',"cut_off"]:
+        for key in ['k','threshold_r','threshold_num']:
             value = getattr(self, key, None)
             if deep and hasattr(value, 'get_params'):
                 deep_items = value.get_params().items()
                 out.update((key + '__' + k, val) for k, val in deep_items)
             out[key] = value
         return out
-    
     
     def set_params(self, **params):
         """Set the parameters of this estimator.
@@ -224,7 +231,8 @@ class AWNN(object):
             valid_params[key] = value
 
         return self
-
+    
+    
 
     def score_samples(self, X):
         """Compute the log-likelihood of each sample under the model.
@@ -240,58 +248,24 @@ class AWNN(object):
         log_density : ndarray of shape (n_test,)
             Log-likelihood of each sample in `X`.
         
-        estAlpha : ndarray of shape (n_test, n_train_)
-            Estimated weights of test instances with respect to training 
-            instances.
         """
+        if self.method_ == "KNN":
+            log_density=knn(X,self.tree_,self.k,self.n_train_,self.dim_,
+                            self.vol_unitball_)
+        elif self.method_ =="WKNN":
+            
+            log_density=wknn(X,self.tree_,self.k,self.n_train_,self.dim_,
+                            self.vol_unitball_)
+        elif self.method_ =="AKNN":
+            kwargs={"threshold_num":self.threshold_num,
+                    "threshold_r":self.threshold_r}
+            log_density=aknn(X,self.tree_,self.k,self.n_train_,self.dim_,
+                            self.vol_unitball_,**kwargs)
+        else:
+            raise ValueError("invalid method: '{0}'".format(self.method_))
+            
         
-        n_test=X.shape[0]
-        estAlpha=np.zeros([n_test,self.n_train_])
-        log_density=np.zeros(n_test)
-        
-        for i in range(n_test):
-            
-            distance_vec,_=self.tree_.query(X[i].reshape(1,-1),self.max_neighbors_+1)
-            distance_vec=distance_vec[0]
-            # rule out self testing
-            if distance_vec[0]==0:
-                distance_vec=distance_vec[1:]
-            else:
-                distance_vec=distance_vec[:-1]
-                
-            beta=self.C*distance_vec
-            
-
-            estAlpha[i,:self.max_neighbors_],alphaIndexMax=weight_selection(beta,cut_off=self.cut_off)
-            
-            # query more points if all points are used
-            if alphaIndexMax==self.max_neighbors_:
-                
-                distance_vec,_=self.tree_.query(X[i].reshape(1,-1),self.n_train_)
-                distance_vec=distance_vec[0]
-                # rule out self testing
-                if distance_vec[0]==0:
-                    distance_vec=distance_vec[1:]
-                    beta=self.C*distance_vec
-                    estAlpha[i,1:],alphaIndexMax=weight_selection(beta,cut_off=self.cut_off)
-                else:
-                    distance_vec=distance_vec
-                    beta=self.C*distance_vec
-                    estAlpha[i,:],alphaIndexMax=weight_selection(beta,cut_off=self.cut_off)
-           
-                
-            density_num=np.array([k for k in range(1,alphaIndexMax+1)]).dot(estAlpha[i,:alphaIndexMax])
-            density_den=np.array([distance_vec[:alphaIndexMax]**self.dim_]).dot(estAlpha[i,:alphaIndexMax])
-            
-            
-            if density_num<=0 or density_den<=0:
-                log_density[i]=-30
-            else:
-                log_density[i] = math.log(density_num)-math.log(density_den)
-                
-        log_density-=np.log(self.n_train_*self.vol_unitball_)
-   
-        return log_density,estAlpha
+        return log_density
     
     
     def predict(self,X,y=None):
@@ -308,13 +282,8 @@ class AWNN(object):
         -------
         log_density : ndarray of shape (n_test,)
             Log-likelihood of each sample in `X`.
-        
-        estAlpha : ndarray of shape (n_test, n_train_)
-            Estimated weights of test instances with respect to training 
-            instances.
         """
-
-        self.log_density,self.estAlpha=self.score_samples(X)
+        self.log_density=self.score_samples(X)
         return self.log_density
     
     
@@ -340,17 +309,17 @@ class AWNN(object):
         """
         
         # Monte Carlo estimation of integral
-        kwargs={"ruleout":0.01,"method":self.sampling_stratigy,"seed":1}
+        kwargs={"ruleout":0.01,"method":self.sampling_stratigy,"seed":self.seed}
         X_validate,pdf_X_validate=mc_sampling(X,nsample=self.score_validate_scale_,**kwargs)
-        validate_log_density,_=self.score_samples(X_validate)
+        validate_log_density=self.score_samples(X_validate)
         
-           
         # if density has been computed, then do not update object attribute
         if self.log_density is None:
-            self.log_density,self.estAlpha=self.score_samples(X)
+            self.log_density=self.score_samples(X)
         
         return self.log_density.mean()-(np.exp(validate_log_density)/pdf_X_validate).mean()
     
+        
     def compute_MISE(self,X):
         """Compute the MISE statistic.
 
@@ -373,16 +342,15 @@ class AWNN(object):
         """
         
         # Monte Carlo estimation of integral
-        kwargs={"ruleout":0.01,"method":self.sampling_stratigy,"seed":1}
+        kwargs={"ruleout":0.01,"method":self.sampling_stratigy,"seed":self.seed}
         X_validate,pdf_X_validate=mc_sampling(X,nsample=self.score_validate_scale_,**kwargs)
-        validate_log_density,_=self.score_samples(X_validate)
-
+        validate_log_density=self.score_samples(X_validate)
+        
         # if density has been computed, then do not update object attribute
         if self.log_density is None:
-            self.log_density,self.estAlpha=self.score_samples(X)
+            self.log_density=self.score_samples(X)
         
         return 2*np.exp(self.log_density).mean()-(np.exp(2*validate_log_density)/pdf_X_validate).mean()
-    
     
     def compute_ANLL(self,X):
         """Compute the average negative log-likelihood.
@@ -390,8 +358,8 @@ class AWNN(object):
         Parameters
         ----------
         X : array-like of shape (n_test, dim_)
-            List of n_test-dimensional data points.  Each row
-            corresponds to a single data point.
+            List of n_test-dimensional data points.  Each row corresponds 
+            to a single data point.
 
         Returns
         -------
@@ -401,8 +369,8 @@ class AWNN(object):
         
         # if density has been computed, then do not update object attribute
         if self.log_density is None:
-            self.log_density,self.estAlpha=self.score_samples(X)
-        
+            self.log_density=self.score_samples(X)
+
         return -self.log_density.mean()
 
     def score(self, X, y=None):
@@ -425,7 +393,6 @@ class AWNN(object):
             Total score of the data in X. Computed via method in 
             score_criterion.
         """
-        
         self.ANLL=self.compute_ANLL(X)
         
         if self.score_criterion=="KL":
@@ -434,7 +401,7 @@ class AWNN(object):
         elif self.score_criterion=="MISE":
             self.MISE=self.compute_MISE(X)
             return self.MISE
-        
+          
                 
                 
             

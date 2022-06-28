@@ -1,2 +1,2 @@
-# AWNN
-Implementation of Adaptive Weighted Nearest Neighbor Density Estimation
+# AdaptiveKNN
+Repository corresponds to Adaptive Weighted k-Nearest Neighbor Density Estimation
