@@ -5,9 +5,13 @@ Nearest Neighbor Based Density Estimation
 
 import numpy as np
 import math
-from sklearn.neighbors import KDTree
 
-from ._utils import mc_sampling,knn,wknn,aknn
+from ._utils import mc_sampling
+from sklearn.neighbors import KDTree
+from ._NNAlgorithms import knn,wknn,aknn,bknn
+
+
+
 
 
 class KNN(object):
@@ -26,6 +30,9 @@ class KNN(object):
         
     threshold_num: int, default= 5
         Threshold paramerter in AKNN to identify tail instances. 
+    
+    C: float, default= 1
+        Scaling paramerter in BKNN.
         
     metric : str, default='euclidean'.
         The distance metric to use.  Note that not all metrics are
@@ -93,7 +100,7 @@ class KNN(object):
 
     Examples
     --------
-    Compute a WKNN density estimate with a fixed C.
+    Compute a WKNN density estimate with a fixed k.
 
     >>> from KNN import KNN
     >>> import numpy as np
@@ -111,16 +118,19 @@ class KNN(object):
                 k=2,
                 threshold_r=0.5,
                 threshold_num=5,
+                C=1,
                 metric="euclidean",
                 leaf_size=40,   
                 seed=1,
                 score_criterion="MISE",
                 sampling_stratigy="bounded"
+                
     ):
         
         self.k=k
         self.threshold_num=threshold_num
         self.threshold_r=threshold_r
+        self.C=C
         self.metric = metric
         self.leaf_size=leaf_size
         self.seed=seed
@@ -177,6 +187,13 @@ class KNN(object):
             self.score_validate_scale_=score_validate_scale
         
         self.method_ = method
+        
+        if self.method_=="BKNN":
+            if self.dim_==1:
+                self.C2=np.sqrt(np.cov(X.T))
+            else:
+                self.C2=np.sqrt(np.linalg.det(np.cov(X.T)))
+            self.C2=self.C2*(0.028*self.n_train_**(0.8))**(1/self.dim_)
         return self
     
     
@@ -195,7 +212,7 @@ class KNN(object):
             Parameter names mapped to their values.
         """
         out = dict()
-        for key in ['k','threshold_r','threshold_num']:
+        for key in ['k','threshold_r','threshold_num','C']:
             value = getattr(self, key, None)
             if deep and hasattr(value, 'get_params'):
                 deep_items = value.get_params().items()
@@ -261,6 +278,14 @@ class KNN(object):
                     "threshold_r":self.threshold_r}
             log_density=aknn(X,self.tree_,self.k,self.n_train_,self.dim_,
                             self.vol_unitball_,**kwargs)
+        elif self.method_ =="BKNN":
+            kwargs={"kmax":int(self.n_train_**(1/2)),
+                    "C2":self.C2,
+                    "C":self.C}
+            
+            log_density=bknn(X,self.tree_,self.n_train_,self.dim_,
+                            self.vol_unitball_,**kwargs)
+            
         else:
             raise ValueError("invalid method: '{0}'".format(self.method_))
             
@@ -283,7 +308,9 @@ class KNN(object):
         log_density : ndarray of shape (n_test,)
             Log-likelihood of each sample in `X`.
         """
+        
         self.log_density=self.score_samples(X)
+        
         return self.log_density
     
     

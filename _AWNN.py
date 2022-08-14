@@ -7,7 +7,9 @@ import numpy as np
 import math
 from sklearn.neighbors import KDTree
 
-from ._utils import mc_sampling,weight_selection
+from ._utils import mc_sampling
+from ._weight_selection import weight_selection
+
 
 
 class AWNN(object):
@@ -240,13 +242,10 @@ class AWNN(object):
         log_density : ndarray of shape (n_test,)
             Log-likelihood of each sample in `X`.
         
-        estAlpha : ndarray of shape (n_test, n_train_)
-            Estimated weights of test instances with respect to training 
-            instances.
         """
         
         n_test=X.shape[0]
-        estAlpha=np.zeros([n_test,self.n_train_])
+        
         log_density=np.zeros(n_test)
         
         for i in range(n_test):
@@ -262,7 +261,7 @@ class AWNN(object):
             beta=self.C*distance_vec
             
 
-            estAlpha[i,:self.max_neighbors_],alphaIndexMax=weight_selection(beta,cut_off=self.cut_off)
+            estAlpha,alphaIndexMax=weight_selection(beta,cut_off=self.cut_off)
             
             # query more points if all points are used
             if alphaIndexMax==self.max_neighbors_:
@@ -273,16 +272,16 @@ class AWNN(object):
                 if distance_vec[0]==0:
                     distance_vec=distance_vec[1:]
                     beta=self.C*distance_vec
-                    estAlpha[i,1:],alphaIndexMax=weight_selection(beta,cut_off=self.cut_off)
+                    estAlpha,alphaIndexMax=weight_selection(beta,cut_off=self.cut_off)
+                    
+                    
                 else:
                     distance_vec=distance_vec
                     beta=self.C*distance_vec
-                    estAlpha[i,:],alphaIndexMax=weight_selection(beta,cut_off=self.cut_off)
-           
-                
-            density_num=np.array([k for k in range(1,alphaIndexMax+1)]).dot(estAlpha[i,:alphaIndexMax])
-            density_den=np.array([distance_vec[:alphaIndexMax]**self.dim_]).dot(estAlpha[i,:alphaIndexMax])
-            
+                    estAlpha,alphaIndexMax=weight_selection(beta,cut_off=self.cut_off)
+                    
+            density_num=np.array([k for k in range(1,alphaIndexMax+1)]).dot(estAlpha[:alphaIndexMax])
+            density_den=np.array([distance_vec[:alphaIndexMax]**self.dim_]).dot(estAlpha[:alphaIndexMax])
             
             if density_num<=0 or density_den<=0:
                 log_density[i]=-30
@@ -291,7 +290,7 @@ class AWNN(object):
                 
         log_density-=np.log(self.n_train_*self.vol_unitball_)
    
-        return log_density,estAlpha
+        return log_density, None
     
     
     def predict(self,X,y=None):

@@ -87,16 +87,16 @@ class AKDE(object):
 
     Examples
     --------
-    Compute a WKNN density estimate with a fixed C.
+    Compute a WKNN density estimate with a fixed c.
 
-    >>> from KNN import KNN
+    >>> from AKDE import AKDE
     >>> import numpy as np
     >>> X_train = np.random.rand(2000).reshape(-1,2)
     >>> X_test = np.random.rand(6).reshape(-1,2)
-    >>> WKNN_model = KNN(k=100).fit(X_train,method="KNN")
-    >>> log_density = WKNN_model.score_samples(X_test)
+    >>> AKDE_model = AKDE(c=2).fit(X_train)
+    >>> log_density = AKDE_model.score_samples(X_test)
     >>> log_density
-    array([ 0.10936768, -0.04164363, -0.27935619])
+    array([ 0.0936768, -0.0214363, -0.1833219])
     """
 
     def __init__(
@@ -118,6 +118,7 @@ class AKDE(object):
         self.seed=seed
         self.score_criterion=score_criterion
         self.sampling_stratigy=sampling_stratigy
+        self.epsilon=1e-10
         
         if metric not in KDTree.valid_metrics:
             raise ValueError("invalid metric: '{0}'".format(metric))
