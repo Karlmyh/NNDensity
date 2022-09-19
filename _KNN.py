@@ -6,9 +6,9 @@ Nearest Neighbor Based Density Estimation
 import numpy as np
 import math
 
-from ._utils import mc_sampling
+from ._utils import mc_sampling,knn,wknn,aknn,bknn
 from sklearn.neighbors import KDTree
-from ._NNAlgorithms import knn,wknn,aknn,bknn
+
 
 
 

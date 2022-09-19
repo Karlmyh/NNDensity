@@ -7,9 +7,7 @@ import numpy as np
 import math
 from sklearn.neighbors import KDTree
 
-from ._utils import mc_sampling
-from ._weight_selection import weight_selection
-
+from ._utils import mc_sampling,weight_selection
 
 
 class AWNN(object):
@@ -104,7 +102,8 @@ class AWNN(object):
         seed=1,
         score_criterion="MISE",
         sampling_stratigy="bounded",
-        cut_off=5
+        cut_off=5,
+        save_weights=False
     ):
         self.C = C
         self.metric = metric
@@ -113,6 +112,7 @@ class AWNN(object):
         self.score_criterion=score_criterion
         self.sampling_stratigy=sampling_stratigy
         self.cut_off=cut_off
+        self.save_weights=save_weights
         
         if metric not in KDTree.valid_metrics:
             raise ValueError("invalid metric: '{0}'".format(metric))
@@ -162,7 +162,7 @@ class AWNN(object):
         
         if max_neighbors=="auto":
             # generally enough with 1e4
-            self.max_neighbors_=min(int(X.shape[0]**(2/3)),10000)
+            self.max_neighbors_=min(int(X.shape[0]*(2/3)),10000)
         else:
             self.max_neighbors_=max_neighbors
             
@@ -247,6 +247,8 @@ class AWNN(object):
         n_test=X.shape[0]
         
         log_density=np.zeros(n_test)
+        if self.save_weights:
+            self.alpha=np.zeros((n_test,self.n_train_-1))
         
         for i in range(n_test):
             
@@ -260,8 +262,11 @@ class AWNN(object):
                 
             beta=self.C*distance_vec
             
-
+            
             estAlpha,alphaIndexMax=weight_selection(beta,cut_off=self.cut_off)
+            # rule out self testing
+            
+           
             
             # query more points if all points are used
             if alphaIndexMax==self.max_neighbors_:
@@ -276,9 +281,11 @@ class AWNN(object):
                     
                     
                 else:
-                    distance_vec=distance_vec
+                    distance_vec=distance_vec[:-1]
                     beta=self.C*distance_vec
                     estAlpha,alphaIndexMax=weight_selection(beta,cut_off=self.cut_off)
+            if self.save_weights:        
+                self.alpha[i,:estAlpha.shape[0]]=estAlpha
                     
             density_num=np.array([k for k in range(1,alphaIndexMax+1)]).dot(estAlpha[:alphaIndexMax])
             density_den=np.array([distance_vec[:alphaIndexMax]**self.dim_]).dot(estAlpha[:alphaIndexMax])

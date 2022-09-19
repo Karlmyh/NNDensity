@@ -218,7 +218,7 @@ def weight_selection(beta,cut_off):
 
     
     if alphaIndexMax<cut_off:
-        estAlpha[cut_off-1]=5
+        estAlpha[cut_off-1]=1
         return estAlpha,cut_off
     
     
@@ -229,6 +229,8 @@ def weight_selection(beta,cut_off):
     estAlpha=estAlpha/np.linalg.norm(estAlpha,ord=1)
     
     return estAlpha,alphaIndexMax
+
+
 
 
 
