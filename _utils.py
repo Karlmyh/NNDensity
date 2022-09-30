@@ -212,6 +212,10 @@ def weight_selection(beta,cut_off):
         else:
             alphaIndexMax-=1
             break
+        
+        
+    if lamda>10000000000:
+        return np.zeros(potentialNeighbors),0
     
     # estimation
     estAlpha=np.zeros(potentialNeighbors)
@@ -332,7 +336,7 @@ def wknn(X,tree,k,n,dim,vol_unitball):
     return log_density
     
     
-def aknn(X,tree,k,n,dim,vol_unitball,**kwargs):
+def tknn(X,tree,k,n,dim,vol_unitball,threshold_num,threshold_r):
     """Adaptive k-NN density estimation. 
 
     Parameters
@@ -356,11 +360,10 @@ def aknn(X,tree,k,n,dim,vol_unitball,**kwargs):
     vol_unitball : float
         Volume of dim_ dimensional unit ball.
         
-    Args:
-        **threshold_r : float
-            Threshold paramerter in AKNN to identify tail instances. 
-        **threshold_num : int 
-            Threshold paramerter in AKNN to identify tail instances. 
+    threshold_r : float
+        Threshold paramerter in AKNN to identify tail instances. 
+    threshold_num : int 
+        Threshold paramerter in AKNN to identify tail instances. 
      
 
     Returns
@@ -379,8 +382,8 @@ def aknn(X,tree,k,n,dim,vol_unitball,**kwargs):
     distance_matrix,_=tree.query(X,k+1)
     
     # identify tail instances
-    mask=tree.query_radius(X, r=kwargs["threshold_r"], 
-                           count_only=True)<kwargs["threshold_num"]
+    mask=tree.query_radius(X, r=threshold_r, 
+                           count_only=True)<threshold_num
     
     # rule out self testing
     if (distance_matrix[:,0]==0).all():
@@ -391,7 +394,7 @@ def aknn(X,tree,k,n,dim,vol_unitball,**kwargs):
     return log_density
     
 
-def bknn(X,tree,n,dim,vol_unitball,**kwargs):
+def bknn(X,tree,n,dim,vol_unitball,kmax,C,C2):
     """Balanced k-NN density estimation. 
 
     Parameters
@@ -415,13 +418,14 @@ def bknn(X,tree,n,dim,vol_unitball,**kwargs):
     vol_unitball : float
         Volume of dim_ dimensional unit ball.
         
-    Args:
-        **kmax : int
-            Number of maximum neighbors to consider in estimaton. 
-        **C : float 
-            Scaling paramerter in BKNN.
-        **C2 : float 
-            Threshold paramerter in BKNN.
+    kmax : int
+        Number of maximum neighbors to consider in estimaton. 
+        
+    C : float 
+        Scaling paramerter in BKNN.
+        
+    C2 : float 
+        Threshold paramerter in BKNN.
      
 
     Returns
@@ -439,24 +443,21 @@ def bknn(X,tree,n,dim,vol_unitball,**kwargs):
     if len(X.shape)==1:
         X=X.reshape(1,-1).copy()
     
-    C2=kwargs["C2"]
     
     log_density=[]
     
     
     for x in X:
         
-        distance_vec,_=tree.query(x.reshape(1,-1),kwargs["kmax"])
+        distance_vec,_=tree.query(x.reshape(1,-1),kmax)
         
         if distance_vec[0,0]==0:
             distance_vec=distance_vec[1:]
         k_temp=1
-        while distance_vec[0,k_temp-1]*k_temp<C2 and k_temp<kwargs["kmax"]:
+        while distance_vec[0,k_temp-1]*k_temp<C2 and k_temp<kmax:
             k_temp+=1
-            
-  
-   
-        log_density.append(np.log(k_temp*kwargs["C"]/n/vol_unitball/(distance_vec[0,k_temp]**dim)+1e-30))
+
+        log_density.append(np.log(k_temp*C/n/vol_unitball/(distance_vec[0,k_temp]**dim)+1e-30))
    
         
     return np.array(log_density)
