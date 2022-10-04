@@ -312,12 +312,9 @@ class BKNN(NNDE):
     def __init__(self,
                  C=0.5):
         super(TKNN, self).__init__()
-        
         self.C=C
 
-        
     def score_samples(self, X):
-    
         
         if self.dim_==1:
             self.C2=np.sqrt(np.cov(X.T))
