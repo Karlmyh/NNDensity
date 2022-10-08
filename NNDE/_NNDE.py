@@ -177,7 +177,10 @@ class AWNN(NNDE):
     def __init__(self,
                  C=1,
                  cut_off=5,
-                 save_weights=False):
+                 save_weights=False,
+                 threshold_num=5,
+                 threshold_r=0.5,
+                 k=2):
         super(AWNN, self).__init__()
         self.C=C
         self.cut_off=cut_off
@@ -260,6 +263,11 @@ class AWNN(NNDE):
     
 class KNN(NNDE):
     def __init__(self,
+                 C=1,
+                 cut_off=5,
+                 save_weights=False,
+                 threshold_num=5,
+                 threshold_r=0.5,
                  k=2):
         super(KNN, self).__init__()
         self.k=k
@@ -275,6 +283,11 @@ class KNN(NNDE):
     
 class WKNN(NNDE):
     def __init__(self,
+                 C=1,
+                 cut_off=5,
+                 save_weights=False,
+                 threshold_num=5,
+                 threshold_r=0.5,
                  k=2):
         super(KNN, self).__init__()
         self.k=k
@@ -291,8 +304,12 @@ class WKNN(NNDE):
     
 class TKNN(NNDE):
     def __init__(self,
+                 C=1,
+                 cut_off=5,
+                 save_weights=False,
                  threshold_num=5,
-                 threshold_r=0.5):
+                 threshold_r=0.5,
+                 k=2):
         super(TKNN, self).__init__()
         self.threshold_num=threshold_num
         self.threshold_r=threshold_r
@@ -310,7 +327,12 @@ class TKNN(NNDE):
     
 class BKNN(NNDE):
     def __init__(self,
-                 C=0.5):
+                 C=0.5,
+                 cut_off=5,
+                 save_weights=False,
+                 threshold_num=5,
+                 threshold_r=0.5,
+                 k=2):
         super(TKNN, self).__init__()
         self.C=C
 

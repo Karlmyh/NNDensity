@@ -7,98 +7,9 @@ import numpy as np
 import math
 from scipy.stats import multivariate_normal
 from scipy.stats import t
+from ._distributions import MultivariateNormalDistribution,TDistribution,MixedDistribution
 
 from numba import njit
-
-
-'''
-Distribution Objects
--------------------- 
-For sample generation and likelihood evaluation w.r.t. certain distribution. 
-
-'''
-class Distribution(object): 
-    def __init__(self):
-        pass
-    def generate(self, num_samples):
-        sample_X = self.sampling(num_samples) 
-        pdf_true = self.density(sample_X) 
-        return sample_X, pdf_true
-    def sampling(self, num_samples): 
-        pass
-    def density(self, sample_X): 
-        pass
-    
-class MultivariateNormalDistribution(Distribution): 
-    def __init__(self, mean, cov):
-        super(MultivariateNormalDistribution, self).__init__()
-        self.mean = mean
-        self.cov = cov
-        self.dim=np.array([mean]).ravel().shape[0]
-        
-    def sampling(self, num_samples):
-            
-        return multivariate_normal.rvs(mean=self.mean,
-                                       cov=self.cov,
-                                       size=num_samples).reshape(-1,self.dim)
-    def density(self, sample_X):
-        return multivariate_normal.pdf(sample_X, mean=self.mean, cov=self.cov)
-    
-    
-class TDistribution(Distribution):
-    def __init__(self,scale,loc,df):
-        super(TDistribution, self).__init__()
-        self.scale = np.array(scale).ravel()
-        self.loc = np.array(loc).ravel()
-        self.df=df
-  
-        self.dim=len(np.array(scale).ravel())
-    def sampling(self, num_samples):
-        
-        sample_X=[]
-        for i in range(self.dim):
-            sample_Xi=t.rvs(loc=self.loc[i],scale=self.scale[i],size=num_samples,df=self.df)
-            
-            
-            sample_X.append(sample_Xi.reshape(-1,1))
-        sample_X = np.concatenate(sample_X, axis=1)
-        return sample_X
-    def density(self, sample_X):
-        return np.prod(t.pdf(sample_X,loc=self.loc,scale=self.scale,df=self.df), axis=1)
- 
-class MixedDistribution(Distribution):
-    def __init__(self, density_seq, prob_seq):
-        super(MixedDistribution, self).__init__()
-        self.density_seq = density_seq
-        self.prob_seq = prob_seq
-        self.num_mix = len(density_seq)
-        self.dim=self.density_seq[0].dim
-        
-    def sampling(self, num_samples):
-        rd_idx = np.random.choice(self.num_mix,size=num_samples, 
-                                  replace=True, p=self.prob_seq)
-        sample_X = []
-        for i in range(self.num_mix):
-            num_i = np.sum(rd_idx == i)
-            density = self.density_seq[i]
-            sample_Xi, _ = density.generate(num_i)
-            sample_X.append(sample_Xi)
-        sample_X = np.concatenate(sample_X, axis=0)
-        np.random.shuffle(sample_X)
-        return sample_X
-    
-    # return density at given vector of point
-    def density(self, sample_X):
-        num_samples = sample_X.shape[0]
-        pdf_true = np.zeros(num_samples, dtype=np.float64) 
-        for i in range(self.num_mix):
-            prob = self.prob_seq[i]
-            density = self.density_seq[i]
-            pdf_true += prob * density.density(sample_X)
-        return pdf_true
-    
-    
-
 
 
 
