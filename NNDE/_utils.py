@@ -5,8 +5,6 @@ Utility Functions
 
 import numpy as np
 import math
-from scipy.stats import multivariate_normal
-from scipy.stats import t
 from ._distributions import MultivariateNormalDistribution,TDistribution,MixedDistribution
 
 from numba import njit
