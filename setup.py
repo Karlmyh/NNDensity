@@ -6,7 +6,7 @@ here = pathlib.Path(__file__).parent.resolve()
 long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
-    name='AWNN',
+    name='NNDE',
 
     version='0.0.1',
 
@@ -18,7 +18,7 @@ setup(
 
     long_description_content_type="text/markdown",
 
-    url='https://github.com/Karlmyh/AWNN',
+    url='https://github.com/Karlmyh/NNDE',
 
     author="Karlmyh",
 
