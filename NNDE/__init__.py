@@ -1,1 +1,1 @@
-from ._AKDE import AKDEfrom ._AWNN import AWNNfrom ._KNN import KNN__all__=["AKDE","KNN","AWNN"]
+from ._NNDE import AWNN,KNN,WKNN,TKNN,BKNN__all__=["KNN","AWNN","WKNN","TKNN","BKNN"]

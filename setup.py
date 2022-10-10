@@ -5,6 +5,9 @@ here = pathlib.Path(__file__).parent.resolve()
 
 long_description = (here / "README.md").read_text(encoding="utf-8")
 
+with open('requirements.txt') as inn:
+    requirements = inn.read().splitlines()
+
 setup(
     name='NNDE',
 
@@ -24,5 +27,8 @@ setup(
 
     author_email="yma@ruc.edu.cn",
 
-    python_requires='>=3'
+    python_requires='>=3',
+    
+    install_requires=requirements,
+    
 )
