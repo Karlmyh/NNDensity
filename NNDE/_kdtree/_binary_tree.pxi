@@ -151,7 +151,7 @@ from libc.string cimport memcpy
 import numpy as np
 import warnings
 
-from ..metrics._dist_metrics cimport (
+from .metrics._dist_metrics cimport (
     DistanceMetric,
     euclidean_dist,
     euclidean_rdist,
@@ -160,11 +160,11 @@ from ..metrics._dist_metrics cimport (
 
 from ._partition_nodes cimport partition_node_indices
 
-from ..utils import check_array
-from ..utils._typedefs cimport DTYPE_t, ITYPE_t
-from ..utils._typedefs import DTYPE, ITYPE
-from ..utils._heap cimport heap_push
-from ..utils._sorting cimport simultaneous_sort as _simultaneous_sort
+from .utils import check_array
+from .utils._typedefs cimport DTYPE_t, ITYPE_t
+from .utils._typedefs import DTYPE, ITYPE
+from .utils._heap cimport heap_push
+from .utils._sorting cimport simultaneous_sort as _simultaneous_sort
 
 cdef extern from "numpy/arrayobject.h":
     void PyArray_ENABLEFLAGS(cnp.ndarray arr, int flags)

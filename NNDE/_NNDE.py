@@ -333,7 +333,7 @@ class BKNN(NNDE):
                  threshold_num=5,
                  threshold_r=0.5,
                  k=2):
-        super(TKNN, self).__init__()
+        super(BKNN, self).__init__()
         self.C=C
 
     def score_samples(self, X):
