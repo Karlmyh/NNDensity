@@ -9,15 +9,6 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 
 
-#from distutils.core import setup
-from Cython.Build import cythonize
-
-setup(
-    ext_modules = cythonize(["NNDE/_kdtree/_kd_tree.pyx"])
-)
-
-
-
 
 with open('requirements.txt') as inn:
     requirements = inn.read().splitlines()
