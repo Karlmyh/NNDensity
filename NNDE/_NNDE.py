@@ -41,8 +41,6 @@ class NNDE(object):
             self.max_neighbors_=min(int(X.shape[0]*(2/3)),10000)
         
             
-        if self.score_validate_scale=="auto":
-            self.score_validate_scale_=self.n_train_*(self.dim_*2)
         
 
         self.tree_ = KDTree(
@@ -54,6 +52,9 @@ class NNDE(object):
         self.dim_=X.shape[1]
         self.n_train_=X.shape[0]
         self.vol_unitball_=math.pi**(self.dim_/2)/math.gamma(self.dim_/2+1)
+        
+        if self.score_validate_scale=="auto":
+            self.score_validate_scale_=self.n_train_*(self.dim_*2)
         
         
         return self
@@ -345,7 +346,7 @@ class BKNN(NNDE):
         self.C2=self.C2*(0.028*self.n_train_**(0.8))**(1/self.dim_)
         self.kmax=int(self.n_train_**0.5)
         
-        log_density=bknn(X,self.tree_,self.k,self.n_train_,self.dim_,
+        log_density=bknn(X,self.tree_,self.n_train_,self.dim_,
                         self.vol_unitball_,self.kmax,self.C,self.C2)
 
         return log_density
