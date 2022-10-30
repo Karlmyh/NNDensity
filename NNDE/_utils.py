@@ -123,7 +123,7 @@ def weight_selection(beta,cut_off):
             break
         
         
-    if lamda>10000000000:
+    if lamda>100:
         return np.zeros(potentialNeighbors),0
     
     # estimation
@@ -355,18 +355,75 @@ def bknn(X,tree,n,dim,vol_unitball,kmax,C,C2):
     
     log_density=[]
     
-    
-    for x in X:
-        
-        distance_vec,_=tree.query(x.reshape(1,-1),kmax)
-        
-        if distance_vec[0,0]==0:
-            distance_vec=distance_vec[1:]
-        k_temp=1
-        while distance_vec[0,k_temp-1]*k_temp<C2 and k_temp<kmax:
-            k_temp+=1
 
-        log_density.append(np.log(k_temp*C/n/vol_unitball/(distance_vec[0,k_temp]**dim)+1e-30))
+    distance_vec, k_vec=tree.query(X,beta=dim,C=C2,max_neighbor=kmax)
+    
+
+
+    log_density.append(np.log(k_vec*C/n/vol_unitball/(distance_vec**dim)+1e-30))
+   
+        
+    return np.array(log_density)
+
+
+def aknn(X,tree,n,dim,vol_unitball,kmax,C):
+    """Balanced k-NN density estimation. 
+
+    Parameters
+    ----------
+    X : array-like of shape (n_test, dim_)
+        List of n_test-dimensional data points.  Each row
+        corresponds to a single data point.
+        
+    tree_ : "KDTree" instance
+        The tree algorithm for fast generalized N-point problems.
+        
+    kmax : int
+        Number of maximum neighbors to consider in estimaton. 
+        
+    n : int
+        Number of traning samples.
+        
+    dim : int
+        Number of features.
+        
+    vol_unitball : float
+        Volume of dim_ dimensional unit ball.
+        
+    kmax : int
+        Number of maximum neighbors to consider in estimaton. 
+        
+    C : float 
+        Scaling paramerter in BKNN.
+        
+    C2 : float 
+        Threshold paramerter in BKNN.
+     
+
+    Returns
+    -------
+    log_density: array-like of shape (n_test, ).
+        Estimated log-density of test samples.
+        
+    Reference
+    ---------
+    Julio A Kovacs, Cailee Helmick, and Willy Wriggers. A balanced approach 
+    to adaptive probability density estimation. Frontiers in molecular 
+    biosciences, 4:25, 2017.
+    """
+
+    if len(X.shape)==1:
+        X=X.reshape(1,-1).copy()
+    
+    
+    log_density=[]
+    
+
+    distance_vec, k_vec=tree.query(X,beta=2,C=C,max_neighbor=kmax)
+    
+
+
+    log_density.append(np.log(k_vec/n/vol_unitball/(distance_vec**dim)+1e-30))
    
         
     return np.array(log_density)

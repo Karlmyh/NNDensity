@@ -1,13 +1,10 @@
-# By Jake Vanderplas (2013) <jakevdp@cs.washington.edu>
-# written for the scikit-learn project
-# License: BSD
+
 
 __all__ = ['KDTree']
 
 DOC_DICT = {'BinaryTree': 'KDTree', 'binary_tree': 'kd_tree'}
 
-VALID_METRICS = ['EuclideanDistance', 'ManhattanDistance',
-                 'ChebyshevDistance', 'MinkowskiDistance']
+VALID_METRICS = ['EuclideanDistance']
 
 
 include "_binary_tree.pxi"
@@ -66,11 +63,9 @@ cdef int init_node(BinaryTree tree, NodeData_t[::1] node_data, ITYPE_t i_node,
             upper_bounds[j] = fmax(upper_bounds[j], data_row[j])
 
     for j in range(n_features):
-        if tree.dist_metric.p == INF:
-            rad = fmax(rad, 0.5 * (upper_bounds[j] - lower_bounds[j]))
-        else:
-            rad += pow(0.5 * abs(upper_bounds[j] - lower_bounds[j]),
-                       tree.dist_metric.p)
+       
+        rad += pow(0.5 * abs(upper_bounds[j] - lower_bounds[j]),
+                   2)
 
     node_data[i_node].idx_start = idx_start
     node_data[i_node].idx_end = idx_end
@@ -78,7 +73,7 @@ cdef int init_node(BinaryTree tree, NodeData_t[::1] node_data, ITYPE_t i_node,
     # The radius will hold the size of the circumscribed hypersphere measured
     # with the specified metric: in querying, this is used as a measure of the
     # size of each node when deciding which nodes to split.
-    node_data[i_node].radius = pow(rad, 1. / tree.dist_metric.p)
+    node_data[i_node].radius = pow(rad, 1. / 2)
     return 0
 
 
@@ -89,29 +84,20 @@ cdef DTYPE_t min_rdist(BinaryTree tree, ITYPE_t i_node,
     cdef DTYPE_t d, d_lo, d_hi, rdist=0.0
     cdef ITYPE_t j
 
-    if tree.dist_metric.p == INF:
-        for j in range(n_features):
-            d_lo = tree.node_bounds[0, i_node, j] - pt[j]
-            d_hi = pt[j] - tree.node_bounds[1, i_node, j]
-            d = (d_lo + fabs(d_lo)) + (d_hi + fabs(d_hi))
-            rdist = fmax(rdist, 0.5 * d)
-    else:
-        # here we'll use the fact that x + abs(x) = 2 * max(x, 0)
-        for j in range(n_features):
-            d_lo = tree.node_bounds[0, i_node, j] - pt[j]
-            d_hi = pt[j] - tree.node_bounds[1, i_node, j]
-            d = (d_lo + fabs(d_lo)) + (d_hi + fabs(d_hi))
-            rdist += pow(0.5 * d, tree.dist_metric.p)
+  
+    for j in range(n_features):
+        d_lo = tree.node_bounds[0, i_node, j] - pt[j]
+        d_hi = pt[j] - tree.node_bounds[1, i_node, j]
+        d = (d_lo + fabs(d_lo)) + (d_hi + fabs(d_hi))
+        rdist += pow(0.5 * d, 2)
 
     return rdist
 
 
 cdef DTYPE_t min_dist(BinaryTree tree, ITYPE_t i_node, DTYPE_t* pt) except -1:
     """Compute the minimum distance between a point and a node"""
-    if tree.dist_metric.p == INF:
-        return min_rdist(tree, i_node, pt)
-    else:
-        return pow(min_rdist(tree, i_node, pt), 1. / tree.dist_metric.p)
+    
+    return pow(min_rdist(tree, i_node, pt), 1. / 2)
 
 
 cdef DTYPE_t max_rdist(BinaryTree tree,
@@ -119,28 +105,22 @@ cdef DTYPE_t max_rdist(BinaryTree tree,
     """Compute the maximum reduced-distance between a point and a node"""
     cdef ITYPE_t n_features = tree.data.shape[1]
 
-    cdef DTYPE_t d, d_lo, d_hi, rdist=0.0
+    cdef DTYPE_t d_lo, d_hi, rdist=0.0
     cdef ITYPE_t j
 
-    if tree.dist_metric.p == INF:
-        for j in range(n_features):
-            rdist = fmax(rdist, fabs(pt[j] - tree.node_bounds[0, i_node, j]))
-            rdist = fmax(rdist, fabs(pt[j] - tree.node_bounds[1, i_node, j]))
-    else:
-        for j in range(n_features):
-            d_lo = fabs(pt[j] - tree.node_bounds[0, i_node, j])
-            d_hi = fabs(pt[j] - tree.node_bounds[1, i_node, j])
-            rdist += pow(fmax(d_lo, d_hi), tree.dist_metric.p)
+    
+    for j in range(n_features):
+        d_lo = fabs(pt[j] - tree.node_bounds[0, i_node, j])
+        d_hi = fabs(pt[j] - tree.node_bounds[1, i_node, j])
+        rdist += pow(fmax(d_lo, d_hi), 2)
 
     return rdist
 
 
 cdef DTYPE_t max_dist(BinaryTree tree, ITYPE_t i_node, DTYPE_t* pt) except -1:
     """Compute the maximum distance between a point and a node"""
-    if tree.dist_metric.p == INF:
-        return max_rdist(tree, i_node, pt)
-    else:
-        return pow(max_rdist(tree, i_node, pt), 1. / tree.dist_metric.p)
+
+    return pow(max_rdist(tree, i_node, pt), 1. / 2)
 
 
 cdef inline int min_max_dist(BinaryTree tree, ITYPE_t i_node, DTYPE_t* pt,
@@ -154,28 +134,17 @@ cdef inline int min_max_dist(BinaryTree tree, ITYPE_t i_node, DTYPE_t* pt,
     min_dist[0] = 0.0
     max_dist[0] = 0.0
 
-    if tree.dist_metric.p == INF:
-        for j in range(n_features):
-            d_lo = tree.node_bounds[0, i_node, j] - pt[j]
-            d_hi = pt[j] - tree.node_bounds[1, i_node, j]
-            d = (d_lo + fabs(d_lo)) + (d_hi + fabs(d_hi))
-            min_dist[0] = fmax(min_dist[0], 0.5 * d)
-            max_dist[0] = fmax(max_dist[0],
-                               fabs(pt[j] - tree.node_bounds[0, i_node, j]))
-            max_dist[0] = fmax(max_dist[0],
-                               fabs(pt[j] - tree.node_bounds[1, i_node, j]))
-    else:
-        # as above, use the fact that x + abs(x) = 2 * max(x, 0)
-        for j in range(n_features):
-            d_lo = tree.node_bounds[0, i_node, j] - pt[j]
-            d_hi = pt[j] - tree.node_bounds[1, i_node, j]
-            d = (d_lo + fabs(d_lo)) + (d_hi + fabs(d_hi))
-            min_dist[0] += pow(0.5 * d, tree.dist_metric.p)
-            max_dist[0] += pow(fmax(fabs(d_lo), fabs(d_hi)),
-                               tree.dist_metric.p)
+ 
+    for j in range(n_features):
+        d_lo = tree.node_bounds[0, i_node, j] - pt[j]
+        d_hi = pt[j] - tree.node_bounds[1, i_node, j]
+        d = (d_lo + fabs(d_lo)) + (d_hi + fabs(d_hi))
+        min_dist[0] += pow(0.5 * d, 2)
+        max_dist[0] += pow(fmax(fabs(d_lo), fabs(d_hi)),
+                           2)
 
-        min_dist[0] = pow(min_dist[0], 1. / tree.dist_metric.p)
-        max_dist[0] = pow(max_dist[0], 1. / tree.dist_metric.p)
+    min_dist[0] = pow(min_dist[0], 1. /2)
+    max_dist[0] = pow(max_dist[0], 1. /2)
 
     return 0
 
@@ -186,7 +155,6 @@ cdef inline DTYPE_t min_rdist_dual(BinaryTree tree1, ITYPE_t i_node1,
     cdef ITYPE_t n_features = tree1.data.shape[1]
 
     cdef DTYPE_t d, d1, d2, rdist=0.0
-    cdef DTYPE_t zero = 0.0
     cdef ITYPE_t j
 
     if tree1.dist_metric.p == INF:
@@ -224,8 +192,7 @@ cdef inline DTYPE_t max_rdist_dual(BinaryTree tree1, ITYPE_t i_node1,
     """Compute the maximum reduced distance between two nodes"""
     cdef ITYPE_t n_features = tree1.data.shape[1]
 
-    cdef DTYPE_t d, d1, d2, rdist=0.0
-    cdef DTYPE_t zero = 0.0
+    cdef DTYPE_t d1, d2, rdist=0.0
     cdef ITYPE_t j
 
     if tree1.dist_metric.p == INF:

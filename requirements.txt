@@ -1,5 +1,5 @@
 numpy
 scipy
-numba
 matplotlib
-sklearn
+scikit-learn
+cython>0.29.31

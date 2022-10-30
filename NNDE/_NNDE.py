@@ -1,6 +1,7 @@
 import numpy as np
 import math
 from sklearn.neighbors import KDTree
+from .kd_tree import KDTree as AKDTree
 
 from ._utils import mc_sampling,weight_selection,knn,wknn,tknn,bknn
 
@@ -35,14 +36,13 @@ class NNDE(object):
         
         
 
-    def fit(self, X, y=None):
+    def _fit(self, X, y=None):
        
         if self.max_neighbors=="auto":
             self.max_neighbors_=min(int(X.shape[0]*(2/3)),10000)
         
             
         
-
         self.tree_ = KDTree(
             X,
             metric=self.metric,
@@ -59,28 +59,31 @@ class NNDE(object):
         
         return self
     
+    def _adaptive_fit(self, X, y=None):
+       
+        if self.max_neighbors=="auto":
+            self.max_neighbors_=min(int(X.shape[0]*(2/3)),10000)
+        
+            
+        
+        self.tree_ = AKDTree(
+            X,
+            metric=self.metric,
+            leaf_size=self.leaf_size,
+        )
+        
+        self.dim_=X.shape[1]
+        self.n_train_=X.shape[0]
+        self.vol_unitball_=math.pi**(self.dim_/2)/math.gamma(self.dim_/2+1)
+        
+        if self.score_validate_scale=="auto":
+            self.score_validate_scale_=self.n_train_*(self.dim_*2)
+        
+        
+        return self
+    
     def get_params(self, deep=True):
-        """Get parameters for this estimator.
-
-        Parameters
-        ----------
-        deep : boolean, optional
-            If True, will return the parameters for this estimator and
-            contained subobjects that are estimators.
-
-        Returns
-        -------
-        params : mapping of string to any
-            Parameter names mapped to their values.
-        """
-        out = dict()
-        for key in ['k','threshold_r','threshold_num','C']:
-            value = getattr(self, key, None)
-            if deep and hasattr(value, 'get_params'):
-                deep_items = value.get_params().items()
-                out.update((key + '__' + k, val) for k, val in deep_items)
-            out[key] = value
-        return out
+        pass
     
     def set_params(self, **params):
         """Set the parameters of this estimator.
@@ -179,13 +182,39 @@ class AWNN(NNDE):
                  C=1,
                  cut_off=5,
                  save_weights=False,
-                 threshold_num=5,
-                 threshold_r=0.5,
-                 k=2):
+                 ):
         super(AWNN, self).__init__()
         self.C=C
         self.cut_off=cut_off
         self.save_weights=save_weights
+        
+        
+    def fit(self,X, y=None):
+        return self._fit(X, y=None)
+
+        
+    def get_params(self, deep=True):
+        """Get parameters for this estimator.
+
+        Parameters
+        ----------
+        deep : boolean, optional
+            If True, will return the parameters for this estimator and
+            contained subobjects that are estimators.
+
+        Returns
+        -------
+        params : mapping of string to any
+            Parameter names mapped to their values.
+        """
+        out = dict()
+        for key in ['C']:
+            value = getattr(self, key, None)
+            if deep and hasattr(value, 'get_params'):
+                deep_items = value.get_params().items()
+                out.update((key + '__' + k, val) for k, val in deep_items)
+            out[key] = value
+        return out
         
         
     def score_samples(self, X):
@@ -264,14 +293,35 @@ class AWNN(NNDE):
     
 class KNN(NNDE):
     def __init__(self,
-                 C=1,
-                 cut_off=5,
-                 save_weights=False,
-                 threshold_num=5,
-                 threshold_r=0.5,
                  k=2):
         super(KNN, self).__init__()
         self.k=k
+        
+    def fit(self,X, y=None):
+        return self._fit(X, y=None)
+        
+    def get_params(self, deep=True):
+        """Get parameters for this estimator.
+
+        Parameters
+        ----------
+        deep : boolean, optional
+            If True, will return the parameters for this estimator and
+            contained subobjects that are estimators.
+
+        Returns
+        -------
+        params : mapping of string to any
+            Parameter names mapped to their values.
+        """
+        out = dict()
+        for key in ['k']:
+            value = getattr(self, key, None)
+            if deep and hasattr(value, 'get_params'):
+                deep_items = value.get_params().items()
+                out.update((key + '__' + k, val) for k, val in deep_items)
+            out[key] = value
+        return out
         
         
     def score_samples(self, X):
@@ -284,14 +334,36 @@ class KNN(NNDE):
     
 class WKNN(NNDE):
     def __init__(self,
-                 C=1,
-                 cut_off=5,
-                 save_weights=False,
-                 threshold_num=5,
-                 threshold_r=0.5,
                  k=2):
         super(KNN, self).__init__()
         self.k=k
+        
+    def fit(self,X, y=None):
+        return self._fit(X, y=None)
+        
+        
+    def get_params(self, deep=True):
+        """Get parameters for this estimator.
+
+        Parameters
+        ----------
+        deep : boolean, optional
+            If True, will return the parameters for this estimator and
+            contained subobjects that are estimators.
+
+        Returns
+        -------
+        params : mapping of string to any
+            Parameter names mapped to their values.
+        """
+        out = dict()
+        for key in ['k']:
+            value = getattr(self, key, None)
+            if deep and hasattr(value, 'get_params'):
+                deep_items = value.get_params().items()
+                out.update((key + '__' + k, val) for k, val in deep_items)
+            out[key] = value
+        return out
         
         
     def score_samples(self, X):
@@ -305,15 +377,39 @@ class WKNN(NNDE):
     
 class TKNN(NNDE):
     def __init__(self,
-                 C=1,
-                 cut_off=5,
-                 save_weights=False,
                  threshold_num=5,
                  threshold_r=0.5,
-                 k=2):
+                 ):
         super(TKNN, self).__init__()
         self.threshold_num=threshold_num
         self.threshold_r=threshold_r
+        
+    def fit(self,X, y=None):
+        return self._fit(X, y=None)
+        
+        
+    def get_params(self, deep=True):
+        """Get parameters for this estimator.
+
+        Parameters
+        ----------
+        deep : boolean, optional
+            If True, will return the parameters for this estimator and
+            contained subobjects that are estimators.
+
+        Returns
+        -------
+        params : mapping of string to any
+            Parameter names mapped to their values.
+        """
+        out = dict()
+        for key in ['threshold_r','threshold_num']:
+            value = getattr(self, key, None)
+            if deep and hasattr(value, 'get_params'):
+                deep_items = value.get_params().items()
+                out.update((key + '__' + k, val) for k, val in deep_items)
+            out[key] = value
+        return out
         
         
     def score_samples(self, X):
@@ -329,14 +425,91 @@ class TKNN(NNDE):
 class BKNN(NNDE):
     def __init__(self,
                  C=0.5,
-                 cut_off=5,
-                 save_weights=False,
-                 threshold_num=5,
-                 threshold_r=0.5,
-                 k=2):
+                 ):
         super(BKNN, self).__init__()
         self.C=C
+        
+    def fit(self,X, y=None):
+        return self._adaptive_fit(X, y=None)
+        
 
+        
+        
+        
+        
+    def get_params(self, deep=True):
+        """Get parameters for this estimator.
+
+        Parameters
+        ----------
+        deep : boolean, optional
+            If True, will return the parameters for this estimator and
+            contained subobjects that are estimators.
+
+        Returns
+        -------
+        params : mapping of string to any
+            Parameter names mapped to their values.
+        """
+        out = dict()
+        for key in ['C']:
+            value = getattr(self, key, None)
+            if deep and hasattr(value, 'get_params'):
+                deep_items = value.get_params().items()
+                out.update((key + '__' + k, val) for k, val in deep_items)
+            out[key] = value
+        return out
+
+    def score_samples(self, X):
+        
+        if self.dim_==1:
+            self.C2=np.sqrt(np.cov(X.T))
+        else:
+            self.C2=np.sqrt(np.linalg.det(np.cov(X.T)))
+        self.C2=self.C2*(0.028*self.n_train_**(0.8))**(1/self.dim_)
+        self.kmax=int(self.n_train_**0.5)
+        
+        log_density=bknn(X,self.tree_,self.n_train_,self.dim_,
+                        self.vol_unitball_,self.kmax,self.C,self.C2)
+
+        return log_density
+    
+    
+class AKNN(NNDE):
+    def __init__(self,
+                 C=0.5,
+                 ):
+        super(AKNN, self).__init__()
+        self.C=C
+        
+    def fit(self,X, y=None):
+        return self._adaptive_fit(X, y=None)
+        
+
+
+    def get_params(self, deep=True):
+        """Get parameters for this estimator.
+
+        Parameters
+        ----------
+        deep : boolean, optional
+            If True, will return the parameters for this estimator and
+            contained subobjects that are estimators.
+
+        Returns
+        -------
+        params : mapping of string to any
+            Parameter names mapped to their values.
+        """
+        out = dict()
+        for key in ['C',"beta"]:
+            value = getattr(self, key, None)
+            if deep and hasattr(value, 'get_params'):
+                deep_items = value.get_params().items()
+                out.update((key + '__' + k, val) for k, val in deep_items)
+            out[key] = value
+        return out
+    
     def score_samples(self, X):
         
         if self.dim_==1:
