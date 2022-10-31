@@ -103,29 +103,19 @@ def weight_selection(beta,cut_off):
     Sum_beta_square = 0
 
     # iterates for k
-    
     while ( lamda>beta[alphaIndexMax] ) and (alphaIndexMax<potentialNeighbors):
         # update max index
         alphaIndexMax +=1
         # updata sum beta and sum beta square
         Sum_beta += beta[alphaIndexMax-1]
         Sum_beta_square += (beta[alphaIndexMax-1])**2
-        
         # calculate lambda
-        
         if  alphaIndexMax  + (Sum_beta**2 - alphaIndexMax * Sum_beta_square)>=0:
-                
-            
             lamda = (1/alphaIndexMax) * ( Sum_beta + math.sqrt( alphaIndexMax  + (Sum_beta**2 - alphaIndexMax * Sum_beta_square) ) )
-            
         else:
             alphaIndexMax-=1
             break
         
-        
-    if lamda>100:
-        return np.zeros(potentialNeighbors),0
-    
     # estimation
     estAlpha=np.zeros(potentialNeighbors)
 
@@ -134,7 +124,6 @@ def weight_selection(beta,cut_off):
         estAlpha[cut_off-1]=1
         return estAlpha,cut_off
     
-    
     for j in range(alphaIndexMax):
         estAlpha[j]=lamda-beta[j]
     
@@ -142,9 +131,6 @@ def weight_selection(beta,cut_off):
     estAlpha=estAlpha/np.linalg.norm(estAlpha,ord=1)
     
     return estAlpha,alphaIndexMax
-
-
-
 
 
 def knn(X,tree,k,n,dim,vol_unitball):
@@ -194,7 +180,7 @@ def knn(X,tree,k,n,dim,vol_unitball):
 
     return log_density
     
-    
+    # TODO: add alpha indexed choice of weights
 def wknn(X,tree,k,n,dim,vol_unitball):
     """Weighted k-NN density estimation. 
 
@@ -292,6 +278,9 @@ def tknn(X,tree,k,n,dim,vol_unitball,threshold_num,threshold_r):
     
     # identify tail instances
     mask=tree.query_radius(X, r=threshold_r, 
+                           count_only=True)<threshold_num
+    
+    masked_estimation=tree.query_radius(X, r=threshold_r, 
                            count_only=True)<threshold_num
     
     # rule out self testing
