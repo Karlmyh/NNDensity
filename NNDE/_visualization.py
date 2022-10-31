@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from ._NNDE import AWNN,TKNN,BKNN,KNN,WKNN
+from ._NNDE import AWNN,TKNN,BKNN,KNN,WKNN,AKNN
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 from matplotlib import patches
 
@@ -9,13 +9,13 @@ method_dict={
     "TKNN":TKNN,
     "BKNN":BKNN,
     "KNN":KNN,
-    "WKNN":WKNN
+    "WKNN":WKNN,
+    "AKNN":AKNN
     }
 
 
 
-def summary():
-    1
+
 
 class contour3d(object):
     def __init__(

@@ -1,6 +1,5 @@
 
 
-__all__ = ['MultivariateNormalDistribution','MixedDistribution','Distribution','UniformDistribution','ExponentialDistribution','BetaDistribution','LaplaceDistribution']
 
 
 import numpy as np
