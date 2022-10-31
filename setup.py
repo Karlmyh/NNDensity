@@ -5,14 +5,14 @@ from Cython.Build import cythonize
 import numpy
 import pathlib
 import os
-
+from numpy.distutils.command.build_ext import build_ext  
 
 here = pathlib.Path(__file__).parent.resolve()
 long_description = (here / "README.md").read_text(encoding="utf-8")
 
 
 
-from numpy.distutils.command.build_ext import build_ext  
+
 
 
 USE_NEWEST_NUMPY_C_API = (
