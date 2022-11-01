@@ -46,7 +46,9 @@ In practical, We apply KD tree from *scikit-learn* to KNN, WKNN, TKNN and AWNN. 
 
 In what follows, we use a toy example to exhibits functionality of NNDE. We first generate 1000 samples from a mixture of Gaussian distribution. The following figure shows the estimation results of methods in NNDE. 
 
-![image](./result.pdf)
+![image](./example_1.pdf)
+![image](./example_2.pdf)
+
 
 
 # Acknowledgement

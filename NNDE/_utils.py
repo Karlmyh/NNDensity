@@ -272,7 +272,7 @@ def bknn(X,tree,n,dim,vol_unitball,kmax,C,C2):
         List of n_test-dimensional data points.  Each row
         corresponds to a single data point.
         
-    tree_ : "KDTree" instance
+    tree_ : "AdaptiveKDTree" instance
         The tree algorithm for fast generalized N-point problems.
         
     kmax : int
@@ -287,16 +287,12 @@ def bknn(X,tree,n,dim,vol_unitball,kmax,C,C2):
     vol_unitball : float
         Volume of dim_ dimensional unit ball.
         
-    kmax : int
-        Number of maximum neighbors to consider in estimaton. 
-        
     C : float 
         Scaling paramerter in BKNN.
         
     C2 : float 
         Threshold paramerter in BKNN.
      
-
     Returns
     -------
     log_density: array-like of shape (n_test, ).
@@ -325,7 +321,7 @@ def aknn(X,tree,n,dim,vol_unitball,kmax,C):
         List of n_test-dimensional data points.  Each row
         corresponds to a single data point.
         
-    tree_ : "KDTree" instance
+    tree_ : "AdaptiveKDTree" instance
         The tree algorithm for fast generalized N-point problems.
         
     kmax : int
@@ -340,13 +336,7 @@ def aknn(X,tree,n,dim,vol_unitball,kmax,C):
     vol_unitball : float
         Volume of dim_ dimensional unit ball.
         
-    kmax : int
-        Number of maximum neighbors to consider in estimaton. 
-        
     C : float 
-        Scaling paramerter in BKNN.
-        
-    C2 : float 
         Threshold paramerter in BKNN.
      
 
@@ -355,11 +345,7 @@ def aknn(X,tree,n,dim,vol_unitball,kmax,C):
     log_density: array-like of shape (n_test, ).
         Estimated log-density of test samples.
         
-    Reference
-    ---------
-    Julio A Kovacs, Cailee Helmick, and Willy Wriggers. A balanced approach 
-    to adaptive probability density estimation. Frontiers in molecular 
-    biosciences, 4:25, 2017.
+
     """
     if len(X.shape) == 1:
         X = X.reshape(1,-1).copy()
