@@ -410,6 +410,7 @@ class TKNN(NNDE):
         array([ -0.01331292, 0.09633435,  -0.05204863])
         """
     def __init__(self,
+                 k=2,
                  threshold_num = 5,
                  threshold_r = 0.5,
                  ):
@@ -435,7 +436,7 @@ class TKNN(NNDE):
             Parameter names mapped to their values.
         """
         out = dict()
-        for key in ['threshold_r','threshold_num']:
+        for key in ["k",'threshold_r','threshold_num']:
             value = getattr(self, key, None)
             if deep and hasattr(value, 'get_params'):
                 deep_items = value.get_params().items()
