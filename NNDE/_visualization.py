@@ -112,7 +112,7 @@ class lineplot(object):
             num_grid = 100,
             alpha = 1,
             true_density_obj = None,
-            **kargs,
+            karg_seq = None,
             ):
         assert type(data) is np.ndarray
         self.data = data
@@ -127,7 +127,10 @@ class lineplot(object):
                                   for i in range(self.data.shape[1])])
         self.lamda_seq = np.linspace(0, 1,self.num_grid)
         self.alpha = alpha
-        self.kargs = kargs
+        self.karg_seq = karg_seq
+        if self.karg_seq is None:
+            self.karg_seq= [ {} for method in self.method_seq]
+        
         self.ylim = [0,0]
         self.true_density_obj = true_density_obj
         if self.true_density_obj:
@@ -136,8 +139,8 @@ class lineplot(object):
     def plot(self):
         # generate screen
         fig, ax = plt.subplots()
-        for method in self.method_seq:
-            model = method_dict[method](**self.kargs).fit(self.data)
+        for method_idx, method in enumerate( self.method_seq) :
+            model = method_dict[method](**self.karg_seq[method_idx]).fit(self.data)
             estimation = np.exp(model.predict(self.test_grid))
             self.ylim[1] = max(self.ylim[1],estimation.max())
             line,  = ax.plot(self.lamda_seq,estimation,linestyle = '-',label = method)
