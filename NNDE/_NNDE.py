@@ -7,7 +7,7 @@ Main Algorithm for NNDE Estimation
 import numpy as np
 import math
 from sklearn.neighbors import KDTree
-from .kd_tree import KDTree as AKDTree
+from ._kd_tree import KDTree as AKDTree
 from ._utils import mc_sampling,weight_selection,knn,wknn,tknn,bknn
 
 

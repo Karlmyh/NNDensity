@@ -254,7 +254,8 @@ def tknn(X,tree,k,n,dim,vol_unitball,threshold_num,threshold_r):
     # identify tail instances
     mask = tree.query_radius(X, r = threshold_r,
                            count_only = True)>threshold_num
-    masked_estimation = np.array([i/n/vol_unitball/threshold_r**dim for i in tree.query_radius(X, r=threshold_r, count_only = True)]) *np.logical_not(mask)
+    masked_estimation = np.array([i/n/vol_unitball/threshold_r**dim 
+                                  for i in tree.query_radius(X, r=threshold_r, count_only = True)]) *np.logical_not(mask)
     # rule out self testing
     if (distance_matrix[:,0] == 0).all():
         log_density = np.log(k/n/vol_unitball/(distance_matrix[:,k]**dim)*mask+1e-30)+masked_estimation
