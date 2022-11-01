@@ -311,7 +311,7 @@ def bknn(X,tree,n,dim,vol_unitball,kmax,C,C2):
     if len(X.shape) == 1:
         X = X.reshape(1,-1).copy()
     log_density=[]
-    distance_vec, k_vec = tree.query(X,beta = dim,C = C2,max_neighbor = kmax)
+    distance_vec, k_vec = tree.adaptive_query(X,beta = dim,C = C2,max_neighbor = kmax)
     log_density.append(np.log(k_vec*C/n/vol_unitball/(distance_vec**dim)+1e-30))
     return np.array(log_density)
 
@@ -364,7 +364,7 @@ def aknn(X,tree,n,dim,vol_unitball,kmax,C):
     if len(X.shape) == 1:
         X = X.reshape(1,-1).copy()
     log_density = []
-    distance_vec, k_vec = tree.query(X,beta = 2,C = C,max_neighbor = kmax)
+    distance_vec, k_vec = tree.adaptive_query(X,beta = dim,C = C,max_neighbor = kmax)
     log_density.append(np.log(k_vec/n/vol_unitball/(distance_vec**dim)+1e-30))
     return np.array(log_density)
     

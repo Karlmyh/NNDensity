@@ -348,7 +348,7 @@ class WKNN(NNDE):
             """
     def __init__(self,
                  k = 2):
-        super(KNN, self).__init__()
+        super(WKNN, self).__init__()
         self.k = k
         
     def fit(self,X, y = None):
