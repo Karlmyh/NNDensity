@@ -1,3 +1,9 @@
+'''
+Main Algorithm for NNDE Estimation
+-----------------
+'''
+
+
 import numpy as np
 import math
 from sklearn.neighbors import KDTree

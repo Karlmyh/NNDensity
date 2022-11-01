@@ -1,3 +1,8 @@
+'''
+Visualization Tools
+-----------------
+'''
+
 import matplotlib.pyplot as plt
 import numpy as np
 from ._NNDE import AWNN,TKNN,BKNN,KNN,WKNN,AKNN
