@@ -417,6 +417,7 @@ class TKNN(NNDE):
         super(TKNN, self).__init__()
         self.threshold_num = threshold_num
         self.threshold_r = threshold_r
+        self.k=k
         
     def fit(self,X, y = None):
         return self._fit(X, y = None)
