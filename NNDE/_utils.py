@@ -313,7 +313,7 @@ def bknn(X,tree,n,dim,vol_unitball,kmax,C,C2):
 
 # TODO: add comments
 def aknn(X,tree,n,dim,vol_unitball,kmax,C):
-    """Balanced k-NN density estimation. 
+    """Adaptive k-NN density estimation. 
 
     Parameters
     ----------
