@@ -725,7 +725,7 @@ class AKNN(NNDE):
     def score_samples(self, X):
         
         self.kmax = int(self.n_train_**0.5)
-        log_density = bknn(X,self.tree_,self.n_train_,self.dim_,
+        log_density = aknn(X,self.tree_,self.n_train_,self.dim_,
                         self.vol_unitball_,self.kmax,self.C)
         return log_density
 
