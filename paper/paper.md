@@ -1,14 +1,4 @@
----
-title: 'NNDE : a python package for Nearest Neighbor Density Estimation'
-tags:
-  - Python
-  - statistics
-  - nearest neighbor
-  - density estimation
-date: 2022 November 2
-bibliography: paper.bib
 
----
 
 # Summary
 
