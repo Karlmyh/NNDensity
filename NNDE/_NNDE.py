@@ -8,7 +8,7 @@ import numpy as np
 import math
 from sklearn.neighbors import KDTree
 from ._kd_tree import KDTree as AKDTree
-from ._utils import mc_sampling,weight_selection,knn,wknn,tknn,bknn
+from ._utils import mc_sampling,weight_selection,knn,wknn,tknn,bknn,aknn
 
 
 
