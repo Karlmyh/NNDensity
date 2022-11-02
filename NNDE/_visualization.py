@@ -21,6 +21,38 @@ method_dict={
 
 
 class contour3d(object):
+    """contour3d
+        Parameters
+        ----------
+        data : numpy.ndarray
+            data used for plotting
+        grid_x : string or numpy.ndarry, default = "auto"
+            grids on x axis
+        grid_y : string or numpy.ndarry, default = "auto"
+            grids on y axis
+        method : string default = "AWNN"
+            method used to train model
+        figsize : turple
+            The size of figure
+        xlim : string default = "auto"
+            The maximum and minimum of x-axis
+        ylim : string default = "auto"
+            The maximum and minimum of y-axis
+        zlim : string default = "auto"
+            The maximum and minimum of z-axis
+        color_scheme : string
+            The cmap plot functions use
+        elev : float default = 20
+            elevation of 3d plot
+        azim : float default = 75
+            azimuth of 3d plot
+        alpha : float default = 1
+            The transparency of the image
+        Attributes
+        ----------
+        estimation : numpy.ndarray
+            estimation of model
+        """
     def __init__(
         self,
         data,
@@ -68,6 +100,7 @@ class contour3d(object):
         self.alpha = alpha
         
     def estimation(self):
+        """ do estimation"""
         axis0,axis1 = np.meshgrid(self.grid_x,self.grid_y)
         X_grid = np.array([axis0.ravel(),axis1.ravel()]).T
         #print(self.data)
@@ -77,6 +110,11 @@ class contour3d(object):
             self.zlim = (0,self.estimation.max())
 
     def make_plot(self):
+        """generate screen
+            Returns
+            -------
+            fig : matplotlib.figure.Figure
+            """
         fig = plt.figure(figsize=self.figsize)
         ax = fig.add_subplot(111,projection="3d")
         axis0, axis1 = np.meshgrid(self.grid_x,self.grid_y)
@@ -96,12 +134,35 @@ class contour3d(object):
         return fig
     
     def plot(self):
+        """ do plot """
         self.estimation()
         return self.make_plot()
     
         
 
 class lineplot(object):
+    """lineplot
+        Parameters
+        ----------
+        data : numpy.ndarray
+            data used for plotting
+        method_seq : list default = ["AWNN"]
+            methods used to train model
+        figsize : turple
+            The size of figure
+        x_start : string or numpy.ndarray default = "auto"
+            start point of slicing line, if default, it is the 
+            minimum of each dimension
+        x_end : string or numpy.ndarray default = "auto"
+            end point of slicing line, if default, it is the 
+            maximum of each dimension
+        num_grid : int default = 100
+            the number of grids
+        alpha : float default = 1
+            The transparency of the image
+        true_density_obj : object default = None
+            the density generation object defined in NNDE used to generate data
+        """
     def __init__(
             self,
             data,
@@ -137,6 +198,11 @@ class lineplot(object):
             self.test_pdf = true_density_obj.density(self.test_grid)
 
     def plot(self):
+        """generate screen
+            Returns
+            -------
+            fig : matplotlib.figure.Figure
+            """
         # generate screen
         fig, ax = plt.subplots()
         for method_idx, method in enumerate( self.method_seq) :
@@ -158,6 +224,32 @@ class lineplot(object):
         
 
 class contourf2d(object):
+    """contourf2d
+        Parameters
+        ----------
+        data : numpy.ndarray
+            data used for plotting
+        grid_x : string or numpy.ndarry, default = "auto"
+            grids on x axis
+        grid_y : string or numpy.ndarry, default = "auto"
+            grids on y axis
+        method : string default = "AWNN"
+            method used to train model
+        figsize : turple
+            The size of figure
+        xlim : string default = "auto"
+            The maximum and minimum of x-axis
+        ylim : string default = "auto"
+            The maximum and minimum of y-axis
+        color_scheme : string
+            The cmap plot function use
+        alpha : float default = 1
+            The transparency of the image
+        Attributes
+        ----------
+        estimation : numpy.ndarray
+            estimation of model
+        """
     def __init__(
         self,
         data,
@@ -199,6 +291,7 @@ class contourf2d(object):
         self.alpha = alpha
         
     def estimation(self):
+        """ do estimation"""
         axis0,axis1 = np.meshgrid(self.grid_x,self.grid_y)
         X_grid = np.array([axis0.ravel(),axis1.ravel()]).T
         #print(self.data)
@@ -206,6 +299,12 @@ class contourf2d(object):
         self.estimation = np.exp(model.predict(X_grid)).reshape(-1,len(self.grid_y))
 
     def make_plot(self):
+        """generate screen
+            Returns
+            -------
+            fig : matplotlib.figure.Figure
+            
+            """
         fig = plt.figure(figsize = self.figsize)
         axis0, axis1 = np.meshgrid(self.grid_x,self.grid_y)
         plt.contour(axis0, axis1, self.estimation, cmap = plt.get_cmap(self.color_scheme),alpha = self.alpha)
@@ -215,12 +314,39 @@ class contourf2d(object):
         return fig
     
     def plot(self):
+        """ do plot """
         self.estimation()
         return self.make_plot()
     
 
 
 class contour2d(object):
+    """contour2d
+        Parameters
+        ----------
+        data : numpy.ndarray
+            data used for plotting
+        grid_x : string or numpy.ndarry, default = "auto"
+            grids on x axis
+        grid_y : string or numpy.ndarry, default = "auto"
+            grids on y axis
+        method : string default = "AWNN"
+            method used to train model
+        figsize : turple
+            The size of figure
+        xlim : string default = "auto"
+            The maximum and minimum of x-axis
+        ylim : string default = "auto"
+            The maximum and minimum of y-axis
+        color_scheme : string
+            The cmap plot function use
+        alpha : float default = 1
+            The transparency of the image
+        Attributes
+        ----------
+        estimation : numpy.ndarray
+            estimation of model
+        """
     def __init__(
         self,
         data,
@@ -262,6 +388,7 @@ class contour2d(object):
         self.alpha = alpha
         
     def estimation(self):
+        """ do estimation"""
         axis0,axis1 = np.meshgrid(self.grid_x,self.grid_y)
         X_grid = np.array([axis0.ravel(),axis1.ravel()]).T
         #print(self.data)
@@ -269,6 +396,11 @@ class contour2d(object):
         self.estimation = np.exp(model.predict(X_grid)).reshape(-1,len(self.grid_y))
 
     def make_plot(self):
+        """generate screen
+            Returns
+            -------
+            fig : matplotlib.figure.Figure
+            """
         fig = plt.figure(figsize=self.figsize)
         axis0, axis1 = np.meshgrid(self.grid_x,self.grid_y)
         plt.contourf(axis0, axis1, self.estimation, cmap = plt.get_cmap(self.color_scheme),alpha = self.alpha)
@@ -278,6 +410,7 @@ class contour2d(object):
         return fig
     
     def plot(self):
+        """ do plot """
         self.estimation()
         return self.make_plot()
         

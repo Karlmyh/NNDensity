@@ -1,3 +1,15 @@
+---
+title: 'NNDE : a python package for Nearest Neighbor Density Estimation'
+tags:
+  - Python
+  - statistics
+  - nearest neighbor
+  - density estimation
+date: 2022 November 2
+bibliography: paper.bib
+
+---
+
 # Summary
 
     Nearest Neighbor based Density Estimation is a class of density estimation method which improve the traditional kernel density estimation by allowing the estimation have varying bandwidth depending on nearest neighbor distances. Several advantages are possessed by NN based density estimations. They are lazy learning methods that require no training stage. They utilize local information for bandwidth selection [@orava2011k]. Their straightforward logic naturally satisfies the requirements of trustworthy AI [@papernot2018deep; @gopfert2022interpretable]. The NNDE package provide an efficient implementation of six NN based density methods that users can directly apply in related studies. The package are presented in class-based manner for extensibility and is compatible with *scikit-learn* based parameter tuning functions such as *sklearn.GridSearchCV*. NNDE's built-in cython implemented adaptive KD tree, which is modidied from *sklearn.neighbors.KDTree*, provides convinient local neighbor selection scheme and is extensible for more adaptive selection functions. Moreover, we provide efficient tools for complex distributions generation and density estimation visualization.
@@ -46,8 +58,8 @@ In practical, We apply KD tree from *scikit-learn* to KNN, WKNN, TKNN and AWNN. 
 
 In what follows, we use a toy example to exhibits functionality of NNDE. We first generate 1000 samples from a mixture of Gaussian distribution. The following figure shows the estimation results of methods in NNDE. 
 
-![image](./example_1.pdf)
-![image](./example_2.pdf)
+![image](./example_1.pdf){width=50%}
+![image](./example_2.pdf){width=50%}
 
 
 

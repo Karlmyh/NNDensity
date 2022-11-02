@@ -14,6 +14,34 @@ from ._utils import mc_sampling,weight_selection,knn,wknn,tknn,bknn
 
 
 class NNDE(object):
+    """General NNDE Density Estimation Object
+    
+        Parameters
+        ----------
+        metric : string , default = "euclidean"
+            metric for the problem. For AKNN and BKNN, only euclidean supported
+        leaf_size : int, default = 40
+            leaf size used for KD tree
+        seed : int,  default = 1
+            random seed
+        score_criterion : string default = "MISE"
+            method used to cross validation
+        sampling_stratigy : string default = "bounded"
+            the sampling scheme used to estimate integral
+        max_neighbors : int default = "auto"
+            the maximum number of neighbors to use, set to max(10000, n**{2/3})
+            if auto
+        score_validate_scale : string default = "auto"
+            sampling number, set to n*d**2 if auto
+        
+        Attributes
+        ----------
+        tree_ : sklearn KD tree or AKD tree object
+        dim_ : dimension of data
+        n_train_ : training sample size
+        vol_unitball_ : volume of unit ball in dimension d space
+        
+    """
     def __init__(
         self,
         metric = "euclidean",
@@ -36,6 +64,18 @@ class NNDE(object):
         self.log_density = None
 
     def _fit(self, X, y=None):
+        """Fitting the model using KD tree.
+
+        Parameters
+        ----------
+        X : array-like of shape (n_train_, dim_)
+            An array of points to train. 
+            
+        Returns
+        -------
+        self 
+        
+        """
         if self.max_neighbors == "auto":
             self.max_neighbors_ = min(int(X.shape[0]*(2/3)),10000)
         self.tree_ = KDTree(
@@ -51,6 +91,18 @@ class NNDE(object):
         return self
     
     def _adaptive_fit(self, X, y = None):
+        """Fitting the model using Adaptive KD tree.
+
+        Parameters
+        ----------
+        X : array-like of shape (n_train_, dim_)
+            An array of points to train. 
+            
+        Returns
+        -------
+        self 
+        
+        """
         if self.max_neighbors == "auto":
             self.max_neighbors_ = min(int(X.shape[0]*(2/3)),10000)
         self.tree_ = AKDTree(
@@ -98,10 +150,48 @@ class NNDE(object):
         pass
 
     def predict(self,X,y = None):
+        """Compute the log-likelihood of each sample under the model. 
+
+        Parameters
+        ----------
+        X : array-like of shape (n_test, dim_)
+            An array of points to query.  Last dimension should match dimension
+            of training data (dim_).
+            
+        Attributes
+        ----------
+        log_denstiy : array-like of shape (n_test, )
+            An array of log probability of query points.
+
+        Returns
+        -------
+        log_density : ndarray of shape (n_test,)
+            Log-likelihood of each sample in `X`.
+        
+        """
         self.log_density = self.score_samples(X)
         return self.log_density
 
     def compute_KL(self,X):
+        """Compute the KL statistic of testing sample under the model. 
+
+        Parameters
+        ----------
+        X : array-like of shape (n_test, dim_)
+            An array of points to query.  Last dimension should match dimension
+            of training data (dim_).
+            
+        Attributes
+        ----------
+        log_denstiy : array-like of shape (n_test, )
+            An array of log probability of query points.
+
+        Returns
+        -------
+        KL statistic : float
+        
+        """
+        
         # Monte Carlo estimation of integral
         kwargs = {"ruleout":0.01,"method":self.sampling_stratigy,"seed":self.seed}
         X_validate,pdf_X_validate = mc_sampling(X,nsample = self.score_validate_scale_,**kwargs)
@@ -112,6 +202,24 @@ class NNDE(object):
         return self.log_density.mean()-(np.exp(validate_log_density)/pdf_X_validate).mean()
 
     def compute_MISE(self,X):
+        """Compute the MISE statistic of testing sample under the model. 
+
+        Parameters
+        ----------
+        X : array-like of shape (n_test, dim_)
+            An array of points to query.  Last dimension should match dimension
+            of training data (dim_).
+            
+        Attributes
+        ----------
+        log_denstiy : array-like of shape (n_test, )
+            An array of log probability of query points.
+
+        Returns
+        -------
+        MISE statistic : float
+        
+        """
         # Monte Carlo estimation of integral
         kwargs = {"ruleout":0.01,"method":self.sampling_stratigy,"seed":self.seed}
         X_validate,pdf_X_validate = mc_sampling(X,nsample = self.score_validate_scale_,**kwargs)
@@ -122,12 +230,48 @@ class NNDE(object):
         return 2*np.exp(self.log_density).mean()-(np.exp(2*validate_log_density)/pdf_X_validate).mean()
     
     def compute_ANLL(self,X):
+        """Compute the ANLL statistic of testing sample under the model. 
+
+        Parameters
+        ----------
+        X : array-like of shape (n_test, dim_)
+            An array of points to query.  Last dimension should match dimension
+            of training data (dim_).
+            
+        Attributes
+        ----------
+        log_denstiy : array-like of shape (n_test, )
+            An array of log probability of query points.
+
+        Returns
+        -------
+        ANLL statistic : float
+        
+        """
         # if density has been computed, then do not update object attribute
         if self.log_density is None:
             self.log_density = self.score_samples(X)
         return -self.log_density.mean()
 
     def score(self, X, y = None):
+        """Compute the score statistic of testing sample under the model. 
+
+        Parameters
+        ----------
+        X : array-like of shape (n_test, dim_)
+            An array of points to query.  Last dimension should match dimension
+            of training data (dim_).
+            
+        Attributes
+        ----------
+        log_denstiy : array-like of shape (n_test, )
+            An array of log probability of query points.
+
+        Returns
+        -------
+        score : float
+        
+        """
         self.ANLL = self.compute_ANLL(X)
         if self.score_criterion == "KL":
             self.KL = self.compute_KL(X)
@@ -462,13 +606,9 @@ class BKNN(NNDE):
         Attributes
         ----------
         C2 : float
-            ?
+            Thresholding constant in adaptive selection
         kmax : int
-            ?
-        See Also
-        --------
-        sklearn.neighbors.KDTree : K-dimensional tree for fast generalized N-point
-            problems.
+            Maximum number of neighbor to use
         Examples
         --------
         Compute a BKNN density estimate with a fixed C.
@@ -535,14 +675,9 @@ class AKNN(NNDE):
             The tuning parameter in AWNN which controls the optimized weights.
         Attributes
         ----------
-        C2 : float
-            ?
         kmax : int
-            ?
-        See Also
-        --------
-        sklearn.neighbors.KDTree : K-dimensional tree for fast generalized N-point
-            problems.
+            Maximum number of neighbors to use
+       
         Examples
         --------
         Compute a AKNN density estimate with a fixed C.
@@ -588,14 +723,10 @@ class AKNN(NNDE):
         return out
     
     def score_samples(self, X):
-        if self.dim_ == 1:
-            self.C2 = np.sqrt(np.cov(X.T))
-        else:
-            self.C2 = np.sqrt(np.linalg.det(np.cov(X.T)))
-        self.C2 = self.C2*(0.028*self.n_train_**(0.8))**(1/self.dim_)
+        
         self.kmax = int(self.n_train_**0.5)
         log_density = bknn(X,self.tree_,self.n_train_,self.dim_,
-                        self.vol_unitball_,self.kmax,self.C,self.C2)
+                        self.vol_unitball_,self.kmax,self.C)
         return log_density
 
 
