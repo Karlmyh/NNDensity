@@ -143,7 +143,29 @@ Out[4]:  0.055937476261628344
 Frequently used visualization plots for density estimation research.
 
 ```python
-###### 2d prediction surface using BKNN
+###### 3d prediction surface using WKNN
+from NNDE import contour3d
+
+# generate samples
+dim=2
+density1 = MultivariateNormalDistribution(mean = np.zeros(dim)+1.5, cov = np.diag(np.ones(dim)*0.4)) 
+density2 = MultivariateNormalDistribution(mean = np.zeros(dim)-1.5, cov = np.diag(np.ones(dim)*0.7)) 
+density_seq = [density1, density2]
+prob_seq = [0.4, 0.6]
+densitymix = MixedDistribution(density_seq, prob_seq)
+X_train, pdf_X_train =densitymix.generate(1000)
+
+model_plot=contour3d(X_train,method="WKNN",k=100)
+model_plot.estimation()
+fig=model_plot.make_plot()
+```
+
+![image](./papers/readme_example_1.pdf){width=50%}
+
+
+
+```python
+###### 2d prediction contour using BKNN
 
 from NNDE import contour2d
 from sklearn.model_selection import GridSearchCV
@@ -156,7 +178,30 @@ model_plot.estimation()
 fig=model_plot.make_plot()
 ```
 
-![image](./papers/readme_example_1.pdf){width=50%}
+![image](./papers/readme_example_2.pdf){width=50%}
+
+
+```python
+###### prediction curve plot
+
+# generate samples
+X_train, pdf_X_train =densitymix.generate(1000)
+
+
+kargs_seq= [{"k":100},{"k":100},{"k":100} ]
+model_plot=lineplot(X_train,method_seq=["KNN", "WKNN", "TKNN"],true_density_obj=densitymix,kargs_seq=kargs_seq)
+fig=model_plot.plot()
+
+kargs_seq= [{"C":0.9},{"C":1},{"C":1} ]
+model_plot=lineplot(X_train,method_seq=["AKNN", "BKNN", "AWNN"],true_density_obj=densitymix,kargs_seq=kargs_seq)
+fig=model_plot.plot()
+
+```
+
+![image](./papers/example_1.pdf){width=50%}
+![image](./papers/example_2.pdf){width=50%}
+
+
 
 
 
