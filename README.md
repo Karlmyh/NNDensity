@@ -156,7 +156,7 @@ model_plot.estimation()
 fig=model_plot.make_plot()
 ```
 
-![image](./example_1.pdf){width=50%}
+![image](./papers/readme_example_1.pdf){width=50%}
 
 
 
