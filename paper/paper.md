@@ -63,7 +63,7 @@ In what follows, we use a toy example to exhibits functionality of NNDE. We firs
 
 # Dependencies
 
-*NNDE* utilizes tools and functionality from *numpy* [@numpy-2020], *matplotlib* [@matplotlib-2007], *scipy* [@SciPy-2020], *jupyter notebooks* [ipython-2007; @jupyter-2016], *scikit-learn* [@sklearn_api], *cython* [@behnel2011cython] and *numba* [@lam2015numba]. 
+*NNDE* utilizes tools and functionality from *numpy* [@numpy-2020], *matplotlib* [@matplotlib-2007], *scipy* [@SciPy-2020], *jupyter notebooks* [ipython-2007], *scikit-learn* [@sklearn_api], *cython* [@behnel2011cython] and *numba* [@lam2015numba]. 
 
 
 
