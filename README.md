@@ -68,10 +68,10 @@ samples
 densitymix.density(samples)
 
 # compare with true pdf
-samples_pdf
+(samples_pdf == samples).all()
 ```
 ```python
-Out[1]:array([[-2.23087816, -1.08521314],
+Out[1]:  array([[-2.23087816, -1.08521314],
        [-1.03424594, -1.24327987],
        [-2.02698363, -1.63201056],
        [ 1.43021832,  1.51448518],
