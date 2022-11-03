@@ -5,6 +5,14 @@ tags:
   - statistics
   - nearest neighbor
   - density estimation
+authors:
+  - name: Yuheng Ma
+    orcid: 0000-0001-8369-9408
+    affiliation: 1
+
+affiliations:
+ - name: School of Statistics, Renmin University of China
+   index: 1
 date: 2022 November 2
 bibliography: paper.bib
 
@@ -36,7 +44,7 @@ $$
 where $w_1,\cdots w_k$ are fixed positive weights summing to 1. In practice, $w_i$ is usually set to $1/k$. KNN and WKNN both utilize fixed weights for all $x$. @zhao2020analysis proposed truncated method **TKNN** to fix the potential problem at the tail of distribution. They perform a pre-estimation using uniform kernel and substitute the pre-estimation with standard KNN when pre-estimation is large, namely 
 $$
 \hat{f}(\mathbf{x})=\left\{\begin{array}{cll}
-\frac{k}{n V_d R_k^d(x) & \text { if } & \hat{f}(x) \leq a \\
+\frac{k}{n V_d R_k^d(x)} & \text { if } & \hat{f}(x) \leq a \\
 \hat{f}(x) & \text { if } & \hat{f}(x)>a
 \end{array}\right.
 $$
@@ -58,8 +66,8 @@ In practical, We apply KD tree from *scikit-learn* to KNN, WKNN, TKNN and AWNN. 
 
 In what follows, we use a toy example to exhibits functionality of NNDE. We first generate 1000 samples from a mixture of Gaussian distribution. The following figure shows the estimation results of methods in NNDE. 
 
-![image](./example_1.pdf){width=50%}
-![image](./example_2.pdf){width=50%}
+![Estimation results of KNN, WKNN and TKNN.](example_1.png){width=50%}
+![Estimation results of AKNN, BKNN and AWNN.](example_2.png){width=50%}
 
 # Dependencies
 
