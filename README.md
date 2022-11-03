@@ -160,7 +160,7 @@ model_plot.estimation()
 fig=model_plot.make_plot()
 ```
 
-<img src="https://github.com/Karlmyh/NNDE/blob/main/paper/example_1.png" width="300">
+<img src="https://github.com/Karlmyh/NNDE/blob/main/paper/readme_example_1.png" width="300">
 
 
 
@@ -179,7 +179,7 @@ model_plot.estimation()
 fig=model_plot.make_plot()
 ```
 
-<img src="https://github.com/Karlmyh/NNDE/blob/main/paper/example_2.png" width="300">
+<img src="https://github.com/Karlmyh/NNDE/blob/main/paper/readme_example_2.png" width="300">
 
 ```python
 ###### prediction curve plot
@@ -198,8 +198,11 @@ fig=model_plot.plot()
 
 ```
 
-<img src="https://github.com/Karlmyh/NNDE/blob/main/paper/readme_example_1.png" width="300">
-<img src="https://github.com/Karlmyh/NNDE/blob/main/paper/readme_example_1.png" width="300">
+<p float="left">
+  <img src="https://github.com/Karlmyh/NNDE/blob/main/paper/example_1.png" width="100" />
+  <img src="https://github.com/Karlmyh/NNDE/blob/main/paper/example_1.png" width="100" /> 
+</p>
+
 
 
 
