@@ -20,7 +20,7 @@ gcc -v
 g++ -v
 ```
 
-to see their version. For Linux, users can install by *apt*. For macOS, refer to *Xcode*. For Windows, refer to *Microsoft c++ building tools*. 
+to see their version. For Linux, users can install gcc/g++ by *apt*. For macOS, refer to *Xcode*. For Windows, refer to *Microsoft c++ building tools*. 
 
 ### Via PypI
 
