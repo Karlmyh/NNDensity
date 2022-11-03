@@ -16,7 +16,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 
 USE_NEWEST_NUMPY_C_API = (
-    "NNDE._partition_nodes",
+    "NNDensity._partition_nodes",
 )
 
 class build_ext_subclass(build_ext):
@@ -51,7 +51,7 @@ if os.name=="posix":
 else:
     libraries=[]
 
-ext_module_partition_nodes = Extension("NNDE._partition_nodes", sources=["./NNDE/_partition_nodes.pyx"],
+ext_module_partition_nodes = Extension("NNDensity._partition_nodes", sources=["./NNDensity/_partition_nodes.pyx"],
           include_dirs=[numpy.get_include()], 
           language="c++",
           libraries=libraries,
@@ -59,8 +59,8 @@ ext_module_partition_nodes = Extension("NNDE._partition_nodes", sources=["./NNDE
 
 
 
-ext_module_kd_tree = Extension("NNDE._kd_tree", 
-           sources=["./NNDE/_kd_tree.pyx"], 
+ext_module_kd_tree = Extension("NNDensity._kd_tree", 
+           sources=["./NNDensity/_kd_tree.pyx"], 
            include_dirs=[numpy.get_include()],
            libraries=libraries,
            )
@@ -79,7 +79,7 @@ with open('requirements.txt') as inn:
     requirements = inn.read().splitlines()
 
 setup(
-    name='NNDE',
+    name='NNDensity',
 
     version='0.0.1',
 
@@ -93,7 +93,7 @@ setup(
 
     long_description_content_type="text/markdown",
 
-    url='https://github.com/Karlmyh/NNDE',
+    url='https://github.com/Karlmyh/NNDensity',
 
     author="Yuheng Ma",
 

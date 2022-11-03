@@ -1,5 +1,5 @@
 ---
-title: 'NNDE : a python package for Nearest Neighbor Density Estimation'
+title: 'NNDensity : a python package for Nearest Neighbor Density Estimation'
 tags:
   - Python
   - statistics
@@ -20,20 +20,20 @@ bibliography: paper.bib
 
 # Summary
 
-    Nearest Neighbor based Density Estimation is a class of density estimation method which improve the traditional kernel density estimation by allowing the estimation have varying bandwidth depending on nearest neighbor distances. Several advantages are possessed by NN based density estimations. They are lazy learning methods that require no training stage. They utilize local information for bandwidth selection [@orava2011k]. Their straightforward logic naturally satisfies the requirements of trustworthy AI [@papernot2018deep; @gopfert2022interpretable]. The NNDE package provide an efficient implementation of six NN based density methods that users can directly apply in related studies. The package are presented in class-based manner for extensibility and is compatible with *scikit-learn* based parameter tuning functions such as *sklearn.GridSearchCV*. NNDE's built-in cython implemented adaptive KD tree, which is modidied from *sklearn.neighbors.KDTree*, provides convinient local neighbor selection scheme and is extensible for more adaptive selection functions. Moreover, we provide efficient tools for complex distributions generation and density estimation visualization.
+    Nearest Neighbor based Density Estimation is a class of density estimation method which improve the traditional kernel density estimation by allowing the estimation have varying bandwidth depending on nearest neighbor distances. Several advantages are possessed by NN based density estimations. They are lazy learning methods that require no training stage. They utilize local information for bandwidth selection [@orava2011k]. Their straightforward logic naturally satisfies the requirements of trustworthy AI [@papernot2018deep; @gopfert2022interpretable]. The NNDensity package provide an efficient implementation of six NN based density methods that users can directly apply in related studies. The package are presented in class-based manner for extensibility and is compatible with *scikit-learn* based parameter tuning functions such as *sklearn.GridSearchCV*. NNDensity's built-in cython implemented adaptive KD tree, which is modidied from *sklearn.neighbors.KDTree*, provides convinient local neighbor selection scheme and is extensible for more adaptive selection functions. Moreover, we provide efficient tools for complex distributions generation and density estimation visualization.
 
 # Statement of Need
 
 
-    There are barely any implementation of nearest neighbor based density estimation methods since the oridinal algorithm is, if equipped with well developed KD tree structure, straight forward and leaves no space for further optimizing. However, as [@kovacs2017balanced; @zhao2020analysis] illustrated, performance of estimation, such as accuracy and robustness, is improved if the estimator is chosen from a large functional space, for instance when NN density estimation is weighted or adaptive. These evolutions of NN bring challenge to algorithm implementation as well as parameter tuning. NNDE for the first time provides user friendly functions for six NN based density methods, namely KNN [@loftsgaarden1965nonparametric], WKNN [@biauweighted], TKNN [@zhao2020analysis], BKNN [@kovacs2017balanced] and newly proposed AKNN and AWNN. For parameter tuning, NNDE is compatible with cross validation methods in *scikit-learn* and is extensible for further development. Under research framework of density estimation, researchers in this area often deal with complex distributions. NNDE include efficient functions for generating complex distributions such as densities with different marginals and mixture of densities. Also, basic visualization tools that exhibit behavior of estimation in arbitray dimensions are provided. 
+    There are barely any implementation of nearest neighbor based density estimation methods since the oridinal algorithm is, if equipped with well developed KD tree structure, straight forward and leaves no space for further optimizing. However, as [@kovacs2017balanced; @zhao2020analysis] illustrated, performance of estimation, such as accuracy and robustness, is improved if the estimator is chosen from a large functional space, for instance when NN density estimation is weighted or adaptive. These evolutions of NN bring challenge to algorithm implementation as well as parameter tuning. NNDensity for the first time provides user friendly functions for six NN based density methods, namely KNN [@loftsgaarden1965nonparametric], WKNN [@biauweighted], TKNN [@zhao2020analysis], BKNN [@kovacs2017balanced] and newly proposed AKNN and AWNN. For parameter tuning, NNDensity is compatible with cross validation methods in *scikit-learn* and is extensible for further development. Under research framework of density estimation, researchers in this area often deal with complex distributions. NNDensity include efficient functions for generating complex distributions such as densities with different marginals and mixture of densities. Also, basic visualization tools that exhibit behavior of estimation in arbitray dimensions are provided. 
 
-    A key component for NN based methods is the KD tree structure. A great many packages provided different implementation schemes [@sklearn_api, @SciPy-2020] for KD tree. @githubpage has done a thourough comparison from perspectives such as dimension restriction, query speed and parallelizability. However, consider if we want to search the largest $k$ such that $k\cdot R_k(x)<C$, where $R_k(x)$ is the kth nearest neighbor distance for $x$. For common KD tree implementations, we would have to query $(R_1(x),\cdots, R_n(x))$ and search iteratively. This guarantees the correct solution when $k=n-1$ but causes much waste of computation if $k=2$. Thus, NNDE choose to modify sklearn, which is based on cython, to implement a KD tree structure with built in adaptive neighbor search algorithm. The algorithm halts the searching of neighbors when nearest neighbor distances exceed some thresholds, which is a much more efficient approach than static searching after querying all the distances. 
+    A key component for NN based methods is the KD tree structure. A great many packages provided different implementation schemes [@sklearn_api, @SciPy-2020] for KD tree. @githubpage has done a thourough comparison from perspectives such as dimension restriction, query speed and parallelizability. However, consider if we want to search the largest $k$ such that $k\cdot R_k(x)<C$, where $R_k(x)$ is the kth nearest neighbor distance for $x$. For common KD tree implementations, we would have to query $(R_1(x),\cdots, R_n(x))$ and search iteratively. This guarantees the correct solution when $k=n-1$ but causes much waste of computation if $k=2$. Thus, NNDensity choose to modify sklearn, which is based on cython, to implement a KD tree structure with built in adaptive neighbor search algorithm. The algorithm halts the searching of neighbors when nearest neighbor distances exceed some thresholds, which is a much more efficient approach than static searching after querying all the distances. 
 
 
 # Methods
 
 
-    In this section, we introduce the nearest neighbor estimation methods included in NNDE. We denote $R_k(x)$ as the distance between $x$ and its $k$-th nearest neighbor. Given $n$ independent identically distributed dataset $\{X_1,\cdots,X_n\}=:D_n \in \mathbb{R}^d$, the standard $k$-NN density estimator (**KNN**) [@loftsgaarden1965nonparametric; @dasgupta2014optimal] for each point $x \in \mathbb{R}^d$ is defined as 
+    In this section, we introduce the nearest neighbor estimation methods included in NNDensity. We denote $R_k(x)$ as the distance between $x$ and its $k$-th nearest neighbor. Given $n$ independent identically distributed dataset $\{X_1,\cdots,X_n\}=:D_n \in \mathbb{R}^d$, the standard $k$-NN density estimator (**KNN**) [@loftsgaarden1965nonparametric; @dasgupta2014optimal] for each point $x \in \mathbb{R}^d$ is defined as 
 $$
 f_k(x)=\frac{k/n}{V_d R_k^d(x)}
 $$
@@ -64,7 +64,7 @@ where $w_1(x),\cdots,w_{k(x)}(x)$ are local weights at $x$. Motivated by the bia
 In practical, We apply KD tree from *scikit-learn* to KNN, WKNN, TKNN and AWNN. Both AKNN and BKNN are implemented through the built-in function in adaptive KD tree and achieve roughly the same computational cost as normal KD tree query. The optimization algorithm of AWNN for weight selection is accelarated via *numba*. 
 
 
-In what follows, we use a toy example to exhibits functionality of NNDE. We first generate 1000 samples from a mixture of Gaussian distribution. The following figure shows the estimation results of methods in NNDE. 
+In what follows, we use a toy example to exhibits functionality of NNDensity. We first generate 1000 samples from a mixture of Gaussian distribution. The following figure shows the estimation results of methods in NNDensity. 
 
 ![Estimation results of KNN, WKNN and TKNN.](example_1.png){width=50%}
 ![Estimation results of AKNN, BKNN and AWNN.](example_2.png){width=50%}
@@ -72,12 +72,6 @@ In what follows, we use a toy example to exhibits functionality of NNDE. We firs
 # Dependencies
 
 *NNDE* utilizes tools and functionality from *numpy* [@numpy-2020], *matplotlib* [@matplotlib-2007], *scipy* [@SciPy-2020], *jupyter notebooks* [ipython-2007], *scikit-learn* [@sklearn_api], *cython* [@behnel2011cython] and *numba* [@lam2015numba]. 
-
-
-
-
-
-
 
 
 # Reference

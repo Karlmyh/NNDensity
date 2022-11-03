@@ -1,4 +1,4 @@
-# Nearest Neighbor Density Estimation (NNDE)
+# Nearest Neighbor Density Estimation (NNDensity)
 
 The package implements six nearest neighbor based density estimation method and provides efficient tools for density estimation research. See paper/paper.md for more descriptions and details in methodology and literature.
 
@@ -13,7 +13,7 @@ The package implements six nearest neighbor based density estimation method and 
 
 ## Installation
 
-Since *NNDE* is based on *Cython*, installation requires c/c++ compiler. Users can check by 
+Since *NNDensity* is based on *Cython*, installation requires c/c++ compiler. Users can check by 
 
 ```bash
 gcc -v
@@ -25,21 +25,21 @@ to see their version. For Linux, users can install gcc/g++ by *apt*. For macOS, 
 ### Via PypI
 
 ```bash
-pip install NNDE
+pip install NNDensity
 ```
 
 ### Via GitHub
 
 ```bash
-pip install git+https://github.com/Karlmyh/NNDE.git
+pip install git+https://github.com/Karlmyh/NNDensity.git
 ```
 
 
 ### Mannul Install
   > 
 ```bash
-git clone git@github.com:Karlmyh/NNDE.git
-cd NNDE 
+git clone git@github.com:Karlmyh/NNDensity.git
+cd NNDensity 
 python setup.py install
 ```
 
@@ -51,7 +51,7 @@ python setup.py install
 Density generation tools. Below is a show case using a mixture distribution.
 
 ```python
-from NNDE import MultivariateNormalDistribution, MixedDistribution, ExponentialDistribution
+from NNDensity import MultivariateNormalDistribution, MixedDistribution, ExponentialDistribution
 # setup
 dim=2
 density1 = ExponentialDistribution(lamda = np.ones(dim)*0.5) 
@@ -92,7 +92,7 @@ Adopt AWNN model to estimate the density.
 
 ```python
 ###### using AWNN to estimate density
-from NNDE import AWNN
+from NNDensity import AWNN
 
 # generate samples
 X_train, pdf_X_train =densitymix.generate(1000)
@@ -144,7 +144,7 @@ Frequently used visualization plots for density estimation research.
 
 ```python
 ###### 3d prediction surface using WKNN
-from NNDE import contour3d
+from NNDensity import contour3d
 
 # generate samples
 dim=2
@@ -160,7 +160,7 @@ model_plot.estimation()
 fig=model_plot.make_plot()
 ```
 
-<img src="https://github.com/Karlmyh/NNDE/blob/main/paper/readme_example_1.png" width="300">
+<img src="https://github.com/Karlmyh/NNDensity/blob/main/paper/readme_example_1.png" width="300">
 
 
 
@@ -168,7 +168,7 @@ fig=model_plot.make_plot()
 ```python
 ###### 2d prediction contour using BKNN
 
-from NNDE import contour2d
+from NNDensity import contour2d
 from sklearn.model_selection import GridSearchCV
 
 # generate samples
@@ -179,7 +179,7 @@ model_plot.estimation()
 fig=model_plot.make_plot()
 ```
 
-<img src="https://github.com/Karlmyh/NNDE/blob/main/paper/readme_example_2.png" width="400">
+<img src="https://github.com/Karlmyh/NNDensity/blob/main/paper/readme_example_2.png" width="400">
 
 ```python
 ###### prediction curve plot
@@ -199,8 +199,8 @@ fig=model_plot.plot()
 ```
 
 <p float="left">
-  <img src="https://github.com/Karlmyh/NNDE/blob/main/paper/example_1.png" width="300" />
-  <img src="https://github.com/Karlmyh/NNDE/blob/main/paper/example_2.png" width="300" /> 
+  <img src="https://github.com/Karlmyh/NNDensity/blob/main/paper/example_1.png" width="300" />
+  <img src="https://github.com/Karlmyh/NNDensity/blob/main/paper/example_2.png" width="300" /> 
 </p>
 
 
@@ -212,5 +212,5 @@ fig=model_plot.plot()
 
 ## Reference
 
-*NNDE* utilizes tools from *numpy*, *matplotlib*, *scipy*, *jupyter notebooks*, *scikit-learn*, *cython* and *numba*. Also, large part of KD tree implementation was borrowed from *scikit-learn*. For specific citations, see papers/paper.md. 
+*NNDensity* utilizes tools from *numpy*, *matplotlib*, *scipy*, *jupyter notebooks*, *scikit-learn*, *cython* and *numba*. Also, large part of KD tree implementation was borrowed from *scikit-learn*. For specific citations, see papers/paper.md. 
 
