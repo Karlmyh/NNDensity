@@ -160,7 +160,7 @@ model_plot.estimation()
 fig=model_plot.make_plot()
 ```
 
-![image](./papers/readme_example_1.pdf){width=50%}
+![image](./papers/readme_example_1.png){width=70%}
 
 
 
@@ -178,7 +178,7 @@ model_plot.estimation()
 fig=model_plot.make_plot()
 ```
 
-![image](./papers/readme_example_2.pdf){width=50%}
+![image](./papers/readme_example_2.png){width=70%}
 
 
 ```python
@@ -198,8 +198,8 @@ fig=model_plot.plot()
 
 ```
 
-![image](./papers/example_1.pdf){width=50%}
-![image](./papers/example_2.pdf){width=50%}
+![image](./papers/example_1.png){width=50%}
+![image](./papers/example_2.png){width=50%}
 
 
 
