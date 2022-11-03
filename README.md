@@ -200,7 +200,7 @@ fig=model_plot.plot()
 
 <p float="left">
   <img src="https://github.com/Karlmyh/NNDE/blob/main/paper/example_1.png" width="300" />
-  <img src="https://github.com/Karlmyh/NNDE/blob/main/paper/example_1.png" width="300" /> 
+  <img src="https://github.com/Karlmyh/NNDE/blob/main/paper/example_2.png" width="300" /> 
 </p>
 
 
