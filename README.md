@@ -212,5 +212,5 @@ fig=model_plot.plot()
 
 ## Reference
 
-*NNDE* utilizes tools and functionality from *numpy*, *matplotlib*, *scipy*, *jupyter notebooks*, *scikit-learn*, *cython* and *numba*. Also, large part of KD tree implementation was borrowed from *scikit-learn*. For specific citations, see papers/paper.md. 
+*NNDE* utilizes tools from *numpy*, *matplotlib*, *scipy*, *jupyter notebooks*, *scikit-learn*, *cython* and *numba*. Also, large part of KD tree implementation was borrowed from *scikit-learn*. For specific citations, see papers/paper.md. 
 
