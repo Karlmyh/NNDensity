@@ -179,7 +179,7 @@ model_plot.estimation()
 fig=model_plot.make_plot()
 ```
 
-<img src="https://github.com/Karlmyh/NNDE/blob/main/paper/readme_example_2.png" width="300">
+<img src="https://github.com/Karlmyh/NNDE/blob/main/paper/readme_example_2.png" width="400">
 
 ```python
 ###### prediction curve plot
@@ -199,8 +199,8 @@ fig=model_plot.plot()
 ```
 
 <p float="left">
-  <img src="https://github.com/Karlmyh/NNDE/blob/main/paper/example_1.png" width="100" />
-  <img src="https://github.com/Karlmyh/NNDE/blob/main/paper/example_1.png" width="100" /> 
+  <img src="https://github.com/Karlmyh/NNDE/blob/main/paper/example_1.png" width="300" />
+  <img src="https://github.com/Karlmyh/NNDE/blob/main/paper/example_1.png" width="300" /> 
 </p>
 
 
@@ -211,3 +211,6 @@ fig=model_plot.plot()
 
 
 ## Reference
+
+*NNDE* utilizes tools and functionality from *numpy*, *matplotlib*, *scipy*, *jupyter notebooks*, *scikit-learn*, *cython* and *numba*. Also, large part of KD tree implementation was borrowed from *scikit-learn*. For specific citations, see papers/paper.md. 
+
