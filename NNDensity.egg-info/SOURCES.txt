@@ -1,4 +1,6 @@
+MANIFEST.in
 README.md
+requirements.txt
 setup.py
 ./NNDensity/_kd_tree.c
 ./NNDensity/_partition_nodes.cpp
