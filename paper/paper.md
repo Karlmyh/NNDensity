@@ -62,11 +62,11 @@ k(x)\cdot R_{k(x)}^d(x)<C
 $$
 for some constant $C$ and dimension $d$, the prediction $k(x)/(nV_dR_{k(x)^d(x)})$ performs better. However, choice of the statistic lacks theoretical support. Also, BKNN provide a plug-in parameter selection scheme for $C$, which is quit empirical and fails when dimension is higher than 2. A work in progress, called **AKNN**, argues that the suitable choice is instead 
 $$
-k(x)\cdot R_{k(x)}^2(x)<C. 
+k(x)\cdot R_{k(x)}^2(x) < C. 
 $$
 while the selection of $C$ is done by cross validation. Moreover, another work in progress consider adaptive weighted nearest neighbor estimation. Weighted estimation for each $x$ is formalized as 
 $$
-	f_{A}(x)=\frac{\sum_{i=1}^{k(x)}w_{i}(x)i/n}{V_d\sum_{i=1}^{k(x)}w_{i}(x) R_{i}^d(x)}
+f_{A}(x)=\frac{\sum_{i=1}^{k(x)}w_{i}(x)i/n}{V_d\sum_{i=1}^{k(x)}w_{i}(x) R_{i}^d(x)}
 $$
 where $w_1(x),\cdots,w_{k(x)}(x)$ are local weights at $x$. Motivated by the bias-variance decomposition for the pointwise error, an efficient optimization approach is provided to select the weights of nearest neighbors for each $x$ adaptively. 
 In practical, We apply KD tree from *scikit-learn* to KNN, WKNN, TKNN and AWNN. Both AKNN and BKNN are implemented through the built-in function in adaptive KD tree and achieve roughly the same computational cost as normal KD tree query. The optimization algorithm of AWNN for weight selection is accelarated via *numba*. 
