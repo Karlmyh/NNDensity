@@ -1,0 +1,647 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Publishing DTD v1.2 20190208//EN"
+                  "JATS-publishing1.dtd">
+<article xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" dtd-version="1.2" article-type="other">
+<front>
+<journal-meta>
+<journal-id></journal-id>
+<journal-title-group>
+<journal-title>Journal of Open Source Software</journal-title>
+<abbrev-journal-title>JOSS</abbrev-journal-title>
+</journal-title-group>
+<issn publication-format="electronic">2475-9066</issn>
+<publisher>
+<publisher-name>Open Journals</publisher-name>
+</publisher>
+</journal-meta>
+<article-meta>
+<article-id pub-id-type="publisher-id">0</article-id>
+<article-id pub-id-type="doi">N/A</article-id>
+<title-group>
+<article-title>NNDE : a python package for Nearest Neighbor Density
+Estimation</article-title>
+</title-group>
+<contrib-group>
+<contrib contrib-type="author">
+<contrib-id contrib-id-type="orcid">0000-0001-8369-9408</contrib-id>
+<name>
+<surname>Ma</surname>
+<given-names>Yuheng</given-names>
+</name>
+<xref ref-type="aff" rid="aff-1"/>
+</contrib>
+<aff id="aff-1">
+<institution-wrap>
+<institution>School of Statistics, Renmin University of
+China</institution>
+</institution-wrap>
+</aff>
+</contrib-group>
+<volume>¿VOL?</volume>
+<issue>¿ISSUE?</issue>
+<fpage>¿PAGE?</fpage>
+<permissions>
+<copyright-statement>Authors of papers retain copyright and release the
+work under a Creative Commons Attribution 4.0 International License (CC
+BY 4.0)</copyright-statement>
+<copyright-year>2022</copyright-year>
+<copyright-holder>The article authors</copyright-holder>
+<license license-type="open-access" xlink:href="https://creativecommons.org/licenses/by/4.0/">
+<license-p>Authors of papers retain copyright and release the work under
+a Creative Commons Attribution 4.0 International License (CC BY
+4.0)</license-p>
+</license>
+</permissions>
+<kwd-group kwd-group-type="author">
+<kwd>Python</kwd>
+<kwd>statistics</kwd>
+<kwd>nearest neighbor</kwd>
+<kwd>density estimation</kwd>
+</kwd-group>
+</article-meta>
+</front>
+<body>
+<sec id="summary">
+  <title>Summary</title>
+  <p>    Nearest Neighbor based Density Estimation is a class of density
+  estimation method which improve the traditional kernel density
+  estimation by allowing the estimation have varying bandwidth depending
+  on nearest neighbor distances. Several advantages are possessed by NN
+  based density estimations. They are lazy learning methods that require
+  no training stage. They utilize local information for bandwidth
+  selection
+  (<xref alt="Orava, 2011" rid="ref-orava2011k" ref-type="bibr">Orava,
+  2011</xref>). Their straightforward logic naturally satisfies the
+  requirements of trustworthy AI
+  (<xref alt="Göpfert et al., 2022" rid="ref-gopfert2022interpretable" ref-type="bibr">Göpfert
+  et al., 2022</xref>;
+  <xref alt="Papernot &amp; McDaniel, 2018" rid="ref-papernot2018deep" ref-type="bibr">Papernot
+  &amp; McDaniel, 2018</xref>). The NNDE package provide an efficient
+  implementation of six NN based density methods that users can directly
+  apply in related studies. The package are presented in class-based
+  manner for extensibility and is compatible with
+  <italic>scikit-learn</italic> based parameter tuning functions such as
+  <italic>sklearn.GridSearchCV</italic>. NNDE’s built-in cython
+  implemented adaptive KD tree, which is modidied from
+  <italic>sklearn.neighbors.KDTree</italic>, provides convinient local
+  neighbor selection scheme and is extensible for more adaptive
+  selection functions. Moreover, we provide efficient tools for complex
+  distributions generation and density estimation visualization.</p>
+</sec>
+<sec id="statement-of-need">
+  <title>Statement of Need</title>
+  <p>    There are barely any implementation of nearest neighbor based
+  density estimation methods since the oridinal algorithm is, if
+  equipped with well developed KD tree structure, straight forward and
+  leaves no space for further optimizing. However, as
+  (<xref alt="Kovacs et al., 2017" rid="ref-kovacs2017balanced" ref-type="bibr">Kovacs
+  et al., 2017</xref>;
+  <xref alt="Zhao &amp; Lai, 2021" rid="ref-zhao2020analysis" ref-type="bibr">Zhao
+  &amp; Lai, 2021</xref>) illustrated, performance of estimation, such
+  as accuracy and robustness, is improved if the estimator is chosen
+  from a large functional space, for instance when NN density estimation
+  is weighted or adaptive. These evolutions of NN bring challenge to
+  algorithm implementation as well as parameter tuning. NNDE for the
+  first time provides user friendly functions for six NN based density
+  methods, namely KNN
+  (<xref alt="Loftsgaarden &amp; Quesenberry, 1965" rid="ref-loftsgaarden1965nonparametric" ref-type="bibr">Loftsgaarden
+  &amp; Quesenberry, 1965</xref>), WKNN
+  (<xref alt="Biau et al., 2011" rid="ref-biauweighted" ref-type="bibr">Biau
+  et al., 2011</xref>), TKNN
+  (<xref alt="Zhao &amp; Lai, 2021" rid="ref-zhao2020analysis" ref-type="bibr">Zhao
+  &amp; Lai, 2021</xref>), BKNN
+  (<xref alt="Kovacs et al., 2017" rid="ref-kovacs2017balanced" ref-type="bibr">Kovacs
+  et al., 2017</xref>) and newly proposed AKNN and AWNN. For parameter
+  tuning, NNDE is compatible with cross validation methods in
+  <italic>scikit-learn</italic> and is extensible for further
+  development. Under research framework of density estimation,
+  researchers in this area often deal with complex distributions. NNDE
+  include efficient functions for generating complex distributions such
+  as densities with different marginals and mixture of densities. Also,
+  basic visualization tools that exhibit behavior of estimation in
+  arbitray dimensions are provided.</p>
+  <p>    A key component for NN based methods is the KD tree structure.
+  A great many packages provided different implementation schemes
+  Virtanen et al.
+  (<xref alt="2020" rid="ref-SciPy-2020" ref-type="bibr">2020</xref>)
+  for KD tree. BodoBookhagen
+  (<xref alt="2013" rid="ref-githubpage" ref-type="bibr">2013</xref>)
+  has done a thourough comparison from perspectives such as dimension
+  restriction, query speed and parallelizability. However, consider if
+  we want to search the largest <inline-formula><alternatives>
+  <tex-math><![CDATA[k]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>k</mml:mi></mml:math></alternatives></inline-formula>
+  such that <inline-formula><alternatives>
+  <tex-math><![CDATA[k\cdot R_k(x)<C]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>k</mml:mi><mml:mo>⋅</mml:mo><mml:msub><mml:mi>R</mml:mi><mml:mi>k</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo>&lt;</mml:mo><mml:mi>C</mml:mi></mml:mrow></mml:math></alternatives></inline-formula>,
+  where <inline-formula><alternatives>
+  <tex-math><![CDATA[R_k(x)]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:msub><mml:mi>R</mml:mi><mml:mi>k</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:math></alternatives></inline-formula>
+  is the kth nearest neighbor distance for
+  <inline-formula><alternatives>
+  <tex-math><![CDATA[x]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>x</mml:mi></mml:math></alternatives></inline-formula>.
+  For common KD tree implementations, we would have to query
+  <inline-formula><alternatives>
+  <tex-math><![CDATA[(R_1(x),\cdots, R_n(x))]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:msub><mml:mi>R</mml:mi><mml:mn>1</mml:mn></mml:msub><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo>,</mml:mo><mml:mi>⋯</mml:mi><mml:mo>,</mml:mo><mml:msub><mml:mi>R</mml:mi><mml:mi>n</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:math></alternatives></inline-formula>
+  and search iteratively. This guarantees the correct solution when
+  <inline-formula><alternatives>
+  <tex-math><![CDATA[k=n-1]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>k</mml:mi><mml:mo>=</mml:mo><mml:mi>n</mml:mi><mml:mo>−</mml:mo><mml:mn>1</mml:mn></mml:mrow></mml:math></alternatives></inline-formula>
+  but causes much waste of computation if <inline-formula><alternatives>
+  <tex-math><![CDATA[k=2]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>k</mml:mi><mml:mo>=</mml:mo><mml:mn>2</mml:mn></mml:mrow></mml:math></alternatives></inline-formula>.
+  Thus, NNDE choose to modify sklearn, which is based on cython, to
+  implement a KD tree structure with built in adaptive neighbor search
+  algorithm. The algorithm halts the searching of neighbors when nearest
+  neighbor distances exceed some thresholds, which is a much more
+  efficient approach than static searching after querying all the
+  distances.</p>
+</sec>
+<sec id="methods">
+  <title>Methods</title>
+  <p>    In this section, we introduce the nearest neighbor estimation
+  methods included in NNDE. We denote <inline-formula><alternatives>
+  <tex-math><![CDATA[R_k(x)]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:msub><mml:mi>R</mml:mi><mml:mi>k</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:math></alternatives></inline-formula>
+  as the distance between <inline-formula><alternatives>
+  <tex-math><![CDATA[x]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>x</mml:mi></mml:math></alternatives></inline-formula>
+  and its <inline-formula><alternatives>
+  <tex-math><![CDATA[k]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>k</mml:mi></mml:math></alternatives></inline-formula>-th
+  nearest neighbor. Given <inline-formula><alternatives>
+  <tex-math><![CDATA[n]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>n</mml:mi></mml:math></alternatives></inline-formula>
+  independent identically distributed dataset
+  <inline-formula><alternatives>
+  <tex-math><![CDATA[\{X_1,\cdots,X_n\}=:D_n \in \mathbb{R}^d]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mo stretchy="false" form="prefix">{</mml:mo><mml:msub><mml:mi>X</mml:mi><mml:mn>1</mml:mn></mml:msub><mml:mo>,</mml:mo><mml:mi>⋯</mml:mi><mml:mo>,</mml:mo><mml:msub><mml:mi>X</mml:mi><mml:mi>n</mml:mi></mml:msub><mml:mo stretchy="false" form="postfix">}</mml:mo><mml:mo>=</mml:mo><mml:mo>:</mml:mo><mml:msub><mml:mi>D</mml:mi><mml:mi>n</mml:mi></mml:msub><mml:mo>∈</mml:mo><mml:msup><mml:mstyle mathvariant="double-struck"><mml:mi>ℝ</mml:mi></mml:mstyle><mml:mi>d</mml:mi></mml:msup></mml:mrow></mml:math></alternatives></inline-formula>,
+  the standard <inline-formula><alternatives>
+  <tex-math><![CDATA[k]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>k</mml:mi></mml:math></alternatives></inline-formula>-NN
+  density estimator (<bold>KNN</bold>)
+  (<xref alt="Dasgupta &amp; Kpotufe, 2014" rid="ref-dasgupta2014optimal" ref-type="bibr">Dasgupta
+  &amp; Kpotufe, 2014</xref>;
+  <xref alt="Loftsgaarden &amp; Quesenberry, 1965" rid="ref-loftsgaarden1965nonparametric" ref-type="bibr">Loftsgaarden
+  &amp; Quesenberry, 1965</xref>) for each point
+  <inline-formula><alternatives>
+  <tex-math><![CDATA[x \in \mathbb{R}^d]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>x</mml:mi><mml:mo>∈</mml:mo><mml:msup><mml:mstyle mathvariant="double-struck"><mml:mi>ℝ</mml:mi></mml:mstyle><mml:mi>d</mml:mi></mml:msup></mml:mrow></mml:math></alternatives></inline-formula>
+  is defined as <disp-formula><alternatives>
+  <tex-math><![CDATA[
+  f_k(x)=\frac{k/n}{V_d R_k^d(x)}
+  ]]></tex-math>
+  <mml:math display="block" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:msub><mml:mi>f</mml:mi><mml:mi>k</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo>=</mml:mo><mml:mfrac><mml:mrow><mml:mi>k</mml:mi><mml:mi>/</mml:mi><mml:mi>n</mml:mi></mml:mrow><mml:mrow><mml:msub><mml:mi>V</mml:mi><mml:mi>d</mml:mi></mml:msub><mml:msubsup><mml:mi>R</mml:mi><mml:mi>k</mml:mi><mml:mi>d</mml:mi></mml:msubsup><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:mfrac></mml:mrow></mml:math></alternatives></disp-formula>
+  where <inline-formula><alternatives>
+  <tex-math><![CDATA[V_d]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:msub><mml:mi>V</mml:mi><mml:mi>d</mml:mi></mml:msub></mml:math></alternatives></inline-formula>
+  be the volume of the unit ball in <inline-formula><alternatives>
+  <tex-math><![CDATA[\mathbb{R}^d]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:msup><mml:mstyle mathvariant="double-struck"><mml:mi>ℝ</mml:mi></mml:mstyle><mml:mi>d</mml:mi></mml:msup></mml:math></alternatives></inline-formula>.
+  An intuitive explanation of this estimator is that from order
+  statistics. <inline-formula><alternatives>
+  <tex-math><![CDATA[P(B(x, R_k(x)))]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>P</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>B</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo>,</mml:mo><mml:msub><mml:mi>R</mml:mi><mml:mi>k</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:math></alternatives></inline-formula>
+  follows Beta Binomial distribution <inline-formula><alternatives>
+  <tex-math><![CDATA[Beta(k, n − k + 1)]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>B</mml:mi><mml:mi>e</mml:mi><mml:mi>t</mml:mi><mml:mi>a</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>k</mml:mi><mml:mo>,</mml:mo><mml:mi>n</mml:mi><mml:mo>−</mml:mo><mml:mi>k</mml:mi><mml:mo>+</mml:mo><mml:mn>1</mml:mn><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:math></alternatives></inline-formula>.
+  As a result, we have <inline-formula><alternatives>
+  <tex-math><![CDATA[\mathbb{E}[P(B(x, R_k(x)))] = k/(n + 1)]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mstyle mathvariant="double-struck"><mml:mi>𝔼</mml:mi></mml:mstyle><mml:mrow><mml:mo stretchy="true" form="prefix">[</mml:mo><mml:mi>P</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>B</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo>,</mml:mo><mml:msub><mml:mi>R</mml:mi><mml:mi>k</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo stretchy="true" form="postfix">]</mml:mo></mml:mrow><mml:mo>=</mml:mo><mml:mi>k</mml:mi><mml:mi>/</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>n</mml:mi><mml:mo>+</mml:mo><mml:mn>1</mml:mn><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:math></alternatives></inline-formula>.
+  Therefore, we have the approximation <inline-formula><alternatives>
+  <tex-math><![CDATA[k/n ≈ P(B(x, R_k(x))) ≈ f(x)V_d R_k(x)^d]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>k</mml:mi><mml:mi>/</mml:mi><mml:mi>n</mml:mi><mml:mo>≈</mml:mo><mml:mi>P</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>B</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo>,</mml:mo><mml:msub><mml:mi>R</mml:mi><mml:mi>k</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo>≈</mml:mo><mml:mi>f</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:msub><mml:mi>V</mml:mi><mml:mi>d</mml:mi></mml:msub><mml:msub><mml:mi>R</mml:mi><mml:mi>k</mml:mi></mml:msub><mml:msup><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mi>d</mml:mi></mml:msup></mml:mrow></mml:math></alternatives></inline-formula>.
+  Biau et al.
+  (<xref alt="2011" rid="ref-biauweighted" ref-type="bibr">2011</xref>)
+  intended to smooth the standard KNN by aligned weighting and propsed
+  <bold>WKNN</bold> defined as <disp-formula><alternatives>
+  <tex-math><![CDATA[
+  {f}_{{W}}(x)=\frac{\sum_{i=1}^{k}w_{i}i/n}{V_d\sum_{i=1}^{k}w_{i} R_{i}^d(x)}
+  ]]></tex-math>
+  <mml:math display="block" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:msub><mml:mi>f</mml:mi><mml:mi>W</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo>=</mml:mo><mml:mfrac><mml:mrow><mml:munderover><mml:mo>∑</mml:mo><mml:mrow><mml:mi>i</mml:mi><mml:mo>=</mml:mo><mml:mn>1</mml:mn></mml:mrow><mml:mi>k</mml:mi></mml:munderover><mml:msub><mml:mi>w</mml:mi><mml:mi>i</mml:mi></mml:msub><mml:mi>i</mml:mi><mml:mi>/</mml:mi><mml:mi>n</mml:mi></mml:mrow><mml:mrow><mml:msub><mml:mi>V</mml:mi><mml:mi>d</mml:mi></mml:msub><mml:munderover><mml:mo>∑</mml:mo><mml:mrow><mml:mi>i</mml:mi><mml:mo>=</mml:mo><mml:mn>1</mml:mn></mml:mrow><mml:mi>k</mml:mi></mml:munderover><mml:msub><mml:mi>w</mml:mi><mml:mi>i</mml:mi></mml:msub><mml:msubsup><mml:mi>R</mml:mi><mml:mi>i</mml:mi><mml:mi>d</mml:mi></mml:msubsup><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:mfrac></mml:mrow></mml:math></alternatives></disp-formula>
+  where <inline-formula><alternatives>
+  <tex-math><![CDATA[w_1,\cdots w_k]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:msub><mml:mi>w</mml:mi><mml:mn>1</mml:mn></mml:msub><mml:mo>,</mml:mo><mml:mi>⋯</mml:mi><mml:msub><mml:mi>w</mml:mi><mml:mi>k</mml:mi></mml:msub></mml:mrow></mml:math></alternatives></inline-formula>
+  are fixed positive weights summing to 1. In practice,
+  <inline-formula><alternatives>
+  <tex-math><![CDATA[w_i]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:msub><mml:mi>w</mml:mi><mml:mi>i</mml:mi></mml:msub></mml:math></alternatives></inline-formula>
+  is usually set to <inline-formula><alternatives>
+  <tex-math><![CDATA[1/k]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mn>1</mml:mn><mml:mi>/</mml:mi><mml:mi>k</mml:mi></mml:mrow></mml:math></alternatives></inline-formula>.
+  KNN and WKNN both utilize fixed weights for all
+  <inline-formula><alternatives>
+  <tex-math><![CDATA[x]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>x</mml:mi></mml:math></alternatives></inline-formula>.
+  Zhao &amp; Lai
+  (<xref alt="2021" rid="ref-zhao2020analysis" ref-type="bibr">2021</xref>)
+  proposed truncated method <bold>TKNN</bold> to fix the potential
+  problem at the tail of distribution. They perform a pre-estimation
+  using uniform kernel and substitute the pre-estimation with standard
+  KNN when pre-estimation is large, namely <disp-formula><alternatives>
+  <tex-math><![CDATA[
+  \hat{f}(\mathbf{x})=\left\{\begin{array}{cll}
+  \frac{k}{n V_d R_k^d(x)} & \text { if } & \hat{f}(x) \leq a \\
+  \hat{f}(x) & \text { if } & \hat{f}(x)>a
+  \end{array}\right.
+  ]]></tex-math>
+  <mml:math display="block" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mover><mml:mi>f</mml:mi><mml:mo accent="true">̂</mml:mo></mml:mover><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mstyle mathvariant="bold"><mml:mi>𝐱</mml:mi></mml:mstyle><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo>=</mml:mo><mml:mrow><mml:mo stretchy="true" form="prefix">{</mml:mo><mml:mtable><mml:mtr><mml:mtd columnalign="center"><mml:mfrac><mml:mi>k</mml:mi><mml:mrow><mml:mi>n</mml:mi><mml:msub><mml:mi>V</mml:mi><mml:mi>d</mml:mi></mml:msub><mml:msubsup><mml:mi>R</mml:mi><mml:mi>k</mml:mi><mml:mi>d</mml:mi></mml:msubsup><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:mfrac></mml:mtd><mml:mtd columnalign="left"><mml:mrow><mml:mspace width="0.333em"></mml:mspace><mml:mtext mathvariant="normal"> if </mml:mtext><mml:mspace width="0.333em"></mml:mspace></mml:mrow></mml:mtd><mml:mtd columnalign="left"><mml:mover><mml:mi>f</mml:mi><mml:mo accent="true">̂</mml:mo></mml:mover><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo>≤</mml:mo><mml:mi>a</mml:mi></mml:mtd></mml:mtr><mml:mtr><mml:mtd columnalign="center"><mml:mover><mml:mi>f</mml:mi><mml:mo accent="true">̂</mml:mo></mml:mover><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mtd><mml:mtd columnalign="left"><mml:mrow><mml:mspace width="0.333em"></mml:mspace><mml:mtext mathvariant="normal"> if </mml:mtext><mml:mspace width="0.333em"></mml:mspace></mml:mrow></mml:mtd><mml:mtd columnalign="left"><mml:mover><mml:mi>f</mml:mi><mml:mo accent="true">̂</mml:mo></mml:mover><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo>&gt;</mml:mo><mml:mi>a</mml:mi></mml:mtd></mml:mtr></mml:mtable></mml:mrow></mml:mrow></mml:math></alternatives></disp-formula>
+  where <inline-formula><alternatives>
+  <tex-math><![CDATA[\hat{f}(x)]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mover><mml:mi>f</mml:mi><mml:mo accent="true">̂</mml:mo></mml:mover><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:math></alternatives></inline-formula>
+  is uniform kernel density estimator. Their method is still
+  non-adaptive, i.e. using fixed number of neighbors, in most regions.
+  Recently, Kovacs et al.
+  (<xref alt="2017" rid="ref-kovacs2017balanced" ref-type="bibr">2017</xref>)
+  argued that adaptive choice of weights (number of neighbors) brings
+  advantages to estimation when encountering densities with drastically
+  varying value. Their <bold>BKNN</bold> demonstrate that by selecting
+  largest <inline-formula><alternatives>
+  <tex-math><![CDATA[k(x)]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>k</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:math></alternatives></inline-formula>
+  such that <disp-formula><alternatives>
+  <tex-math><![CDATA[
+  k(x)\cdot R_{k(x)}^d(x)<C
+  ]]></tex-math>
+  <mml:math display="block" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>k</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo>⋅</mml:mo><mml:msubsup><mml:mi>R</mml:mi><mml:mrow><mml:mi>k</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow><mml:mi>d</mml:mi></mml:msubsup><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo>&lt;</mml:mo><mml:mi>C</mml:mi></mml:mrow></mml:math></alternatives></disp-formula>
+  for some constant <inline-formula><alternatives>
+  <tex-math><![CDATA[C]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>C</mml:mi></mml:math></alternatives></inline-formula>
+  and dimension <inline-formula><alternatives>
+  <tex-math><![CDATA[d]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>d</mml:mi></mml:math></alternatives></inline-formula>,
+  the prediction <inline-formula><alternatives>
+  <tex-math><![CDATA[k(x)/(nV_dR_{k(x)^d(x)})]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>k</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mi>/</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>n</mml:mi><mml:msub><mml:mi>V</mml:mi><mml:mi>d</mml:mi></mml:msub><mml:msub><mml:mi>R</mml:mi><mml:mrow><mml:mi>k</mml:mi><mml:msup><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mi>d</mml:mi></mml:msup><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:msub><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:math></alternatives></inline-formula>
+  performs better. However, choice of the statistic lacks theoretical
+  support. Also, BKNN provide a plug-in parameter selection scheme for
+  <inline-formula><alternatives>
+  <tex-math><![CDATA[C]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>C</mml:mi></mml:math></alternatives></inline-formula>,
+  which is quit empirical and fails when dimension is higher than 2. A
+  work in progress, called <bold>AKNN</bold>, argues that the suitable
+  choice is instead <disp-formula><alternatives>
+  <tex-math><![CDATA[
+  k(x)\cdot R_{k(x)}^2(x)<C. 
+  ]]></tex-math>
+  <mml:math display="block" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>k</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo>⋅</mml:mo><mml:msubsup><mml:mi>R</mml:mi><mml:mrow><mml:mi>k</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow><mml:mn>2</mml:mn></mml:msubsup><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo>&lt;</mml:mo><mml:mi>C</mml:mi><mml:mi>.</mml:mi></mml:mrow></mml:math></alternatives></disp-formula>
+  while the selection of <inline-formula><alternatives>
+  <tex-math><![CDATA[C]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>C</mml:mi></mml:math></alternatives></inline-formula>
+  is done by cross validation. Moreover, another work in progress
+  consider adaptive weighted nearest neighbor estimation. Weighted
+  estimation for each <inline-formula><alternatives>
+  <tex-math><![CDATA[x]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>x</mml:mi></mml:math></alternatives></inline-formula>
+  is formalized as <disp-formula><alternatives>
+  <tex-math><![CDATA[
+      f_{A}(x)=\frac{\sum_{i=1}^{k(x)}w_{i}(x)i/n}{V_d\sum_{i=1}^{k(x)}w_{i}(x) R_{i}^d(x)}
+  ]]></tex-math>
+  <mml:math display="block" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:msub><mml:mi>f</mml:mi><mml:mi>A</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo>=</mml:mo><mml:mfrac><mml:mrow><mml:munderover><mml:mo>∑</mml:mo><mml:mrow><mml:mi>i</mml:mi><mml:mo>=</mml:mo><mml:mn>1</mml:mn></mml:mrow><mml:mrow><mml:mi>k</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:munderover><mml:msub><mml:mi>w</mml:mi><mml:mi>i</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mi>i</mml:mi><mml:mi>/</mml:mi><mml:mi>n</mml:mi></mml:mrow><mml:mrow><mml:msub><mml:mi>V</mml:mi><mml:mi>d</mml:mi></mml:msub><mml:munderover><mml:mo>∑</mml:mo><mml:mrow><mml:mi>i</mml:mi><mml:mo>=</mml:mo><mml:mn>1</mml:mn></mml:mrow><mml:mrow><mml:mi>k</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:munderover><mml:msub><mml:mi>w</mml:mi><mml:mi>i</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:msubsup><mml:mi>R</mml:mi><mml:mi>i</mml:mi><mml:mi>d</mml:mi></mml:msubsup><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:mfrac></mml:mrow></mml:math></alternatives></disp-formula>
+  where <inline-formula><alternatives>
+  <tex-math><![CDATA[w_1(x),\cdots,w_{k(x)}(x)]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:msub><mml:mi>w</mml:mi><mml:mn>1</mml:mn></mml:msub><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo>,</mml:mo><mml:mi>⋯</mml:mi><mml:mo>,</mml:mo><mml:msub><mml:mi>w</mml:mi><mml:mrow><mml:mi>k</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:msub><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:math></alternatives></inline-formula>
+  are local weights at <inline-formula><alternatives>
+  <tex-math><![CDATA[x]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>x</mml:mi></mml:math></alternatives></inline-formula>.
+  Motivated by the bias-variance decomposition for the pointwise error,
+  an efficient optimization approach is provided to select the weights
+  of nearest neighbors for each <inline-formula><alternatives>
+  <tex-math><![CDATA[x]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>x</mml:mi></mml:math></alternatives></inline-formula>
+  adaptively. In practical, We apply KD tree from
+  <italic>scikit-learn</italic> to KNN, WKNN, TKNN and AWNN. Both AKNN
+  and BKNN are implemented through the built-in function in adaptive KD
+  tree and achieve roughly the same computational cost as normal KD tree
+  query. The optimization algorithm of AWNN for weight selection is
+  accelarated via <italic>numba</italic>.</p>
+  <p>In what follows, we use a toy example to exhibits functionality of
+  NNDE. We first generate 1000 samples from a mixture of Gaussian
+  distribution. The following figure shows the estimation results of
+  methods in NNDE.</p>
+  <p><inline-graphic mimetype="image" mime-subtype="png" xlink:href="media/example_1.png" />
+  <inline-graphic mimetype="image" mime-subtype="png" xlink:href="media/example_2.png" /></p>
+</sec>
+<sec id="dependencies">
+  <title>Dependencies</title>
+  <p><italic>NNDE</italic> utilizes tools and functionality from
+  <italic>numpy</italic>
+  (<xref alt="Harris et al., 2020" rid="ref-numpy-2020" ref-type="bibr">Harris
+  et al., 2020</xref>), <italic>matplotlib</italic>
+  (<xref alt="Hunter, 2007" rid="ref-matplotlib-2007" ref-type="bibr">Hunter,
+  2007</xref>), <italic>scipy</italic>
+  (<xref alt="Virtanen et al., 2020" rid="ref-SciPy-2020" ref-type="bibr">Virtanen
+  et al., 2020</xref>), <italic>jupyter notebooks</italic>
+  [ipython-2007], <italic>scikit-learn</italic>
+  (<xref alt="Buitinck et al., 2013" rid="ref-sklearn_api" ref-type="bibr">Buitinck
+  et al., 2013</xref>), <italic>cython</italic>
+  (<xref alt="Behnel et al., 2011" rid="ref-behnel2011cython" ref-type="bibr">Behnel
+  et al., 2011</xref>) and <italic>numba</italic>
+  (<xref alt="Lam et al., 2015" rid="ref-lam2015numba" ref-type="bibr">Lam
+  et al., 2015</xref>).</p>
+</sec>
+<sec id="reference">
+  <title>Reference</title>
+</sec>
+</body>
+<back>
+<ref-list>
+  <ref id="ref-zhao2020analysis">
+    <element-citation publication-type="paper-conference">
+      <person-group person-group-type="author">
+        <name><surname>Zhao</surname><given-names>Puning</given-names></name>
+        <name><surname>Lai</surname><given-names>Lifeng</given-names></name>
+      </person-group>
+      <article-title>On the convergence rates of KNN density estimation</article-title>
+      <source>2021 IEEE international symposium on information theory (ISIT)</source>
+      <publisher-name>IEEE</publisher-name>
+      <year iso-8601-date="2021">2021</year>
+      <fpage>2840</fpage>
+      <lpage>2845</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-loftsgaarden1965nonparametric">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Loftsgaarden</surname><given-names>Don O</given-names></name>
+        <name><surname>Quesenberry</surname><given-names>Charles P</given-names></name>
+      </person-group>
+      <article-title>A nonparametric estimate of a multivariate density function</article-title>
+      <source>The Annals of Mathematical Statistics</source>
+      <publisher-name>Institute of Mathematical Statistics</publisher-name>
+      <year iso-8601-date="1965">1965</year>
+      <volume>36</volume>
+      <issue>3</issue>
+      <fpage>1049</fpage>
+      <lpage>1051</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-orava2011k">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Orava</surname><given-names>Jan</given-names></name>
+      </person-group>
+      <article-title>K-nearest neighbour kernel density estimation, the choice of optimal k</article-title>
+      <source>Tatra Mountains Mathematical Publications</source>
+      <year iso-8601-date="2011">2011</year>
+      <volume>50</volume>
+      <issue>1</issue>
+      <fpage>39</fpage>
+      <lpage>50</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-githubpage">
+    <element-citation>
+      <person-group person-group-type="author">
+        <name><surname>BodoBookhagen</surname></name>
+      </person-group>
+      <article-title>LidarPC-KDTree</article-title>
+      <source>GitHub repository</source>
+      <publisher-name>https://github.com/UP-RS-ESP/LidarPC-KDTree; GitHub</publisher-name>
+      <year iso-8601-date="2013">2013</year>
+    </element-citation>
+  </ref>
+  <ref id="ref-behnel2011cython">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Behnel</surname><given-names>Stefan</given-names></name>
+        <name><surname>Bradshaw</surname><given-names>Robert</given-names></name>
+        <name><surname>Citro</surname><given-names>Craig</given-names></name>
+        <name><surname>Dalcin</surname><given-names>Lisandro</given-names></name>
+        <name><surname>Seljebotn</surname><given-names>Dag Sverre</given-names></name>
+        <name><surname>Smith</surname><given-names>Kurt</given-names></name>
+      </person-group>
+      <article-title>Cython: The best of both worlds</article-title>
+      <source>Computing in Science &amp; Engineering</source>
+      <publisher-name>IEEE</publisher-name>
+      <year iso-8601-date="2011">2011</year>
+      <volume>13</volume>
+      <issue>2</issue>
+      <fpage>31</fpage>
+      <lpage>39</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-lam2015numba">
+    <element-citation publication-type="paper-conference">
+      <person-group person-group-type="author">
+        <name><surname>Lam</surname><given-names>Siu Kwan</given-names></name>
+        <name><surname>Pitrou</surname><given-names>Antoine</given-names></name>
+        <name><surname>Seibert</surname><given-names>Stanley</given-names></name>
+      </person-group>
+      <article-title>Numba: A llvm-based python jit compiler</article-title>
+      <source>Proceedings of the second workshop on the LLVM compiler infrastructure in HPC</source>
+      <year iso-8601-date="2015">2015</year>
+      <fpage>1</fpage>
+      <lpage>6</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-SciPy-2020">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Virtanen</surname><given-names>Pauli</given-names></name>
+        <name><surname>Gommers</surname><given-names>Ralf</given-names></name>
+        <name><surname>Oliphant</surname><given-names>Travis E.</given-names></name>
+        <name><surname>Haberland</surname><given-names>Matt</given-names></name>
+        <name><surname>Reddy</surname><given-names>Tyler</given-names></name>
+        <name><surname>Cournapeau</surname><given-names>David</given-names></name>
+        <name><surname>Burovski</surname><given-names>Evgeni</given-names></name>
+        <name><surname>Peterson</surname><given-names>Pearu</given-names></name>
+        <name><surname>Weckesser</surname><given-names>Warren</given-names></name>
+        <name><surname>Bright</surname><given-names>Jonathan</given-names></name>
+        <name><surname>van der Walt</surname><given-names>Stéfan J.</given-names></name>
+        <name><surname>Brett</surname><given-names>Matthew</given-names></name>
+        <name><surname>Wilson</surname><given-names>Joshua</given-names></name>
+        <name><surname>Millman</surname><given-names>K. Jarrod</given-names></name>
+        <name><surname>Mayorov</surname><given-names>Nikolay</given-names></name>
+        <name><surname>Nelson</surname><given-names>Andrew R. J.</given-names></name>
+        <name><surname>Jones</surname><given-names>Eric</given-names></name>
+        <name><surname>Kern</surname><given-names>Robert</given-names></name>
+        <name><surname>Larson</surname><given-names>Eric</given-names></name>
+        <name><surname>Carey</surname><given-names>C J</given-names></name>
+        <name><surname>Polat</surname><given-names>İlhan</given-names></name>
+        <name><surname>Feng</surname><given-names>Yu</given-names></name>
+        <name><surname>Moore</surname><given-names>Eric W.</given-names></name>
+        <name><surname>VanderPlas</surname><given-names>Jake</given-names></name>
+        <name><surname>Laxalde</surname><given-names>Denis</given-names></name>
+        <name><surname>Perktold</surname><given-names>Josef</given-names></name>
+        <name><surname>Cimrman</surname><given-names>Robert</given-names></name>
+        <name><surname>Henriksen</surname><given-names>Ian</given-names></name>
+        <name><surname>Quintero</surname><given-names>E. A.</given-names></name>
+        <name><surname>Harris</surname><given-names>Charles R.</given-names></name>
+        <name><surname>Archibald</surname><given-names>Anne M.</given-names></name>
+        <name><surname>Ribeiro</surname><given-names>Antônio H.</given-names></name>
+        <name><surname>Pedregosa</surname><given-names>Fabian</given-names></name>
+        <name><surname>van Mulbregt</surname><given-names>Paul</given-names></name>
+        <string-name>SciPy 1.0 Contributors</string-name>
+      </person-group>
+      <article-title>SciPy 1.0: Fundamental Algorithms for Scientific Computing in Python</article-title>
+      <source>Nature Methods</source>
+      <year iso-8601-date="2020">2020</year>
+      <volume>17</volume>
+      <pub-id pub-id-type="doi">10.1038/s41592-019-0686-2</pub-id>
+      <fpage>261</fpage>
+      <lpage>272</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-sklearn_api">
+    <element-citation publication-type="paper-conference">
+      <person-group person-group-type="author">
+        <name><surname>Buitinck</surname><given-names>Lars</given-names></name>
+        <name><surname>Louppe</surname><given-names>Gilles</given-names></name>
+        <name><surname>Blondel</surname><given-names>Mathieu</given-names></name>
+        <name><surname>Pedregosa</surname><given-names>Fabian</given-names></name>
+        <name><surname>Mueller</surname><given-names>Andreas</given-names></name>
+        <name><surname>Grisel</surname><given-names>Olivier</given-names></name>
+        <name><surname>Niculae</surname><given-names>Vlad</given-names></name>
+        <name><surname>Prettenhofer</surname><given-names>Peter</given-names></name>
+        <name><surname>Gramfort</surname><given-names>Alexandre</given-names></name>
+        <name><surname>Grobler</surname><given-names>Jaques</given-names></name>
+        <name><surname>Layton</surname><given-names>Robert</given-names></name>
+        <name><surname>VanderPlas</surname><given-names>Jake</given-names></name>
+        <name><surname>Joly</surname><given-names>Arnaud</given-names></name>
+        <name><surname>Holt</surname><given-names>Brian</given-names></name>
+        <name><surname>Varoquaux</surname><given-names>Gaël</given-names></name>
+      </person-group>
+      <article-title>API design for machine learning software: Experiences from the scikit-learn project</article-title>
+      <source>ECML PKDD workshop: Languages for data mining and machine learning</source>
+      <year iso-8601-date="2013">2013</year>
+      <fpage>108</fpage>
+      <lpage>122</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-biauweighted">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Biau</surname><given-names>Gérard</given-names></name>
+        <name><surname>Chazal</surname><given-names>Frédéric</given-names></name>
+        <name><surname>Cohen-Steiner</surname><given-names>David</given-names></name>
+        <name><surname>Devroye</surname><given-names>Luc</given-names></name>
+        <name><surname>Rodriguez</surname><given-names>Carlos</given-names></name>
+      </person-group>
+      <article-title>A weighted k-nearest neighbor density estimate for geometric inference</article-title>
+      <source>Electronic Journal of Statistics</source>
+      <publisher-name>Institute of Mathematical Statistics; Bernoulli Society</publisher-name>
+      <year iso-8601-date="2011">2011</year>
+      <volume>5</volume>
+      <fpage>204</fpage>
+      <lpage>237</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-kovacs2017balanced">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Kovacs</surname><given-names>Julio A</given-names></name>
+        <name><surname>Helmick</surname><given-names>Cailee</given-names></name>
+        <name><surname>Wriggers</surname><given-names>Willy</given-names></name>
+      </person-group>
+      <article-title>A balanced approach to adaptive probability density estimation</article-title>
+      <source>Frontiers in molecular biosciences</source>
+      <publisher-name>Frontiers Media SA</publisher-name>
+      <year iso-8601-date="2017">2017</year>
+      <volume>4</volume>
+      <fpage>25</fpage>
+      <lpage></lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-papernot2018deep">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Papernot</surname><given-names>Nicolas</given-names></name>
+        <name><surname>McDaniel</surname><given-names>Patrick</given-names></name>
+      </person-group>
+      <article-title>Deep k-nearest neighbors: Towards confident, interpretable and robust deep learning</article-title>
+      <source>arXiv preprint arXiv:1803.04765</source>
+      <year iso-8601-date="2018">2018</year>
+    </element-citation>
+  </ref>
+  <ref id="ref-gopfert2022interpretable">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Göpfert</surname><given-names>Jan Philip</given-names></name>
+        <name><surname>Wersing</surname><given-names>Heiko</given-names></name>
+        <name><surname>Hammer</surname><given-names>Barbara</given-names></name>
+      </person-group>
+      <article-title>Interpretable locally adaptive nearest neighbors</article-title>
+      <source>Neurocomputing</source>
+      <publisher-name>Elsevier</publisher-name>
+      <year iso-8601-date="2022">2022</year>
+      <volume>470</volume>
+      <fpage>344</fpage>
+      <lpage>351</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-numpy-2020">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Harris</surname><given-names>Charles R.</given-names></name>
+        <name><surname>Millman</surname><given-names>K. Jarrod</given-names></name>
+        <name><surname>Walt</surname><given-names>St’efan J. van der</given-names></name>
+        <name><surname>Gommers</surname><given-names>Ralf</given-names></name>
+        <name><surname>Virtanen</surname><given-names>Pauli</given-names></name>
+        <name><surname>Cournapeau</surname><given-names>David</given-names></name>
+        <name><surname>Wieser</surname><given-names>Eric</given-names></name>
+        <name><surname>Taylor</surname><given-names>Julian</given-names></name>
+        <name><surname>Berg</surname><given-names>Sebastian</given-names></name>
+        <name><surname>Smith</surname><given-names>Nathaniel J.</given-names></name>
+        <name><surname>Kern</surname><given-names>Robert</given-names></name>
+        <name><surname>Picus</surname><given-names>Matti</given-names></name>
+        <name><surname>Hoyer</surname><given-names>Stephan</given-names></name>
+        <name><surname>Kerkwijk</surname><given-names>Marten H. van</given-names></name>
+        <name><surname>Brett</surname><given-names>Matthew</given-names></name>
+        <name><surname>Haldane</surname><given-names>Allan</given-names></name>
+        <name><surname>R’ıo</surname><given-names>Jaime Fern’andez del</given-names></name>
+        <name><surname>Wiebe</surname><given-names>Mark</given-names></name>
+        <name><surname>Peterson</surname><given-names>Pearu</given-names></name>
+        <name><surname>G’erard-Marchant</surname><given-names>Pierre</given-names></name>
+        <name><surname>Sheppard</surname><given-names>Kevin</given-names></name>
+        <name><surname>Reddy</surname><given-names>Tyler</given-names></name>
+        <name><surname>Weckesser</surname><given-names>Warren</given-names></name>
+        <name><surname>Abbasi</surname><given-names>Hameer</given-names></name>
+        <name><surname>Gohlke</surname><given-names>Christoph</given-names></name>
+        <name><surname>Oliphant</surname><given-names>Travis E.</given-names></name>
+      </person-group>
+      <article-title>Array programming with NumPy</article-title>
+      <source>Nature</source>
+      <publisher-name>Springer Science; Business Media LLC</publisher-name>
+      <year iso-8601-date="2020-09">2020</year><month>09</month>
+      <volume>585</volume>
+      <issue>7825</issue>
+      <uri>https://doi.org/10.1038/s41586-020-2649-2</uri>
+      <pub-id pub-id-type="doi">10.1038/s41586-020-2649-2</pub-id>
+      <fpage>357</fpage>
+      <lpage>362</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-matplotlib-2007">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Hunter</surname><given-names>J. D.</given-names></name>
+      </person-group>
+      <article-title>Matplotlib: A 2D graphics environment</article-title>
+      <source>Computing In Science &amp; Engineering</source>
+      <publisher-name>IEEE COMPUTER SOC</publisher-name>
+      <year iso-8601-date="2007">2007</year>
+      <volume>9</volume>
+      <issue>3</issue>
+      <pub-id pub-id-type="doi">10.1109/mcse.2007.55</pub-id>
+      <fpage>90</fpage>
+      <lpage>95</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-dasgupta2014optimal">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Dasgupta</surname><given-names>Sanjoy</given-names></name>
+        <name><surname>Kpotufe</surname><given-names>Samory</given-names></name>
+      </person-group>
+      <article-title>Optimal rates for k-nn density and mode estimation</article-title>
+      <source>Advances in Neural Information Processing Systems</source>
+      <year iso-8601-date="2014">2014</year>
+      <volume>27</volume>
+    </element-citation>
+  </ref>
+</ref-list>
+</back>
+</article>
