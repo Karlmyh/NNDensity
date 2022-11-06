@@ -1,6 +1,30 @@
+---
+title: 'NNDensity : a python package for Nearest Neighbor Density Estimation'
+tags:
+  - Python
+  - statistics
+  - nearest neighbor
+  - density estimation
+authors:
+  - name: Yuheng Ma
+    orcid: 0000-0001-8369-9408
+    affiliation: 1
+    
+  - name: Yuchao Cai
+    orcid: 
+    affiliation: 1
+    
+  - name: Shaoxin Ye
+    orcid: 0000-0002-6555-2354
+    affiliation: 1
 
-NNDensity : a python package for Nearest Neighbor Density Estimation
+affiliations:
+ - name: School of Statistics, Renmin University of China
+   index: 1
+date: 2022 November 2
+bibliography: paper.bib
 
+---
 
 # Summary
 
