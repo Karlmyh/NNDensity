@@ -316,8 +316,23 @@ class AWNN(NNDE):
                  C = 1,
                  cut_off = 5,
                  save_weights = False,
+                 metric = "euclidean",
+                leaf_size = 40,
+                seed = 1,
+                score_criterion = "MISE",
+                sampling_stratigy = "bounded",
+                max_neighbors = "auto",
+                score_validate_scale = "auto"
                  ):
-        super(AWNN, self).__init__()
+        super(AWNN, self).__init__(
+            metric = metric,
+            leaf_size = leaf_size,
+            seed = seed,
+            score_criterion = score_criterion,
+            sampling_stratigy = sampling_stratigy,
+            max_neighbors = max_neighbors,
+            score_validate_scale = score_validate_scale,
+                                  )
         self.C = C
         self.cut_off = cut_off
         self.save_weights = save_weights
@@ -429,8 +444,24 @@ class KNN(NNDE):
         array([ 0.092323179, -0.03631248,  0.07321349])
         """
     def __init__(self,
-                 k = 2):
-        super(KNN, self).__init__()
+                 k = 2,
+                metric = "euclidean",
+                leaf_size = 40,
+                seed = 1,
+                score_criterion = "MISE",
+                sampling_stratigy = "bounded",
+                max_neighbors = "auto",
+                score_validate_scale = "auto"
+                ):
+        super(KNN, self).__init__(
+            metric = metric,
+            leaf_size = leaf_size,
+            seed = seed,
+            score_criterion = score_criterion,
+            sampling_stratigy = sampling_stratigy,
+            max_neighbors = max_neighbors,
+            score_validate_scale = score_validate_scale,
+                                  )
         self.k = k
         
     def fit(self,X, y = None):
@@ -491,8 +522,24 @@ class WKNN(NNDE):
             array([ 0.12865613, -0.00533184,  0.83342628])
             """
     def __init__(self,
-                 k = 2):
-        super(WKNN, self).__init__()
+                 k = 2,
+                metric = "euclidean",
+                leaf_size = 40,
+                seed = 1,
+                score_criterion = "MISE",
+                sampling_stratigy = "bounded",
+                max_neighbors = "auto",
+                score_validate_scale = "auto"
+                ):
+        super(WKNN, self).__init__(
+            metric = metric,
+            leaf_size = leaf_size,
+            seed = seed,
+            score_criterion = score_criterion,
+            sampling_stratigy = sampling_stratigy,
+            max_neighbors = max_neighbors,
+            score_validate_scale = score_validate_scale,
+                                  )
         self.k = k
         
     def fit(self,X, y = None):
@@ -557,8 +604,23 @@ class TKNN(NNDE):
                  k=2,
                  threshold_num = 5,
                  threshold_r = 0.5,
+                 metric = "euclidean",
+                leaf_size = 40,
+                seed = 1,
+                score_criterion = "MISE",
+                sampling_stratigy = "bounded",
+                max_neighbors = "auto",
+                score_validate_scale = "auto"
                  ):
-        super(TKNN, self).__init__()
+        super(TKNN, self).__init__(
+            metric = metric,
+            leaf_size = leaf_size,
+            seed = seed,
+            score_criterion = score_criterion,
+            sampling_stratigy = sampling_stratigy,
+            max_neighbors = max_neighbors,
+            score_validate_scale = score_validate_scale,
+                                  )
         self.threshold_num = threshold_num
         self.threshold_r = threshold_r
         self.k=k
@@ -623,8 +685,23 @@ class BKNN(NNDE):
         """
     def __init__(self,
                  C = 0.5,
+                 metric = "euclidean",
+                leaf_size = 40,
+                seed = 1,
+                score_criterion = "MISE",
+                sampling_stratigy = "bounded",
+                max_neighbors = "auto",
+                score_validate_scale = "auto"
                  ):
-        super(BKNN, self).__init__()
+        super(BKNN, self).__init__(
+            metric = metric,
+            leaf_size = leaf_size,
+            seed = seed,
+            score_criterion = score_criterion,
+            sampling_stratigy = sampling_stratigy,
+            max_neighbors = max_neighbors,
+            score_validate_scale = score_validate_scale,
+                                  )
         self.C = C
         
     def fit(self,X, y = None):
@@ -692,8 +769,23 @@ class AKNN(NNDE):
         """
     def __init__(self,
                  C = 0.5,
+                 metric = "euclidean",
+                leaf_size = 40,
+                seed = 1,
+                score_criterion = "MISE",
+                sampling_stratigy = "bounded",
+                max_neighbors = "auto",
+                score_validate_scale = "auto"
                  ):
-        super(AKNN, self).__init__()
+        super(AKNN, self).__init__(
+            metric = metric,
+            leaf_size = leaf_size,
+            seed = seed,
+            score_criterion = score_criterion,
+            sampling_stratigy = sampling_stratigy,
+            max_neighbors = max_neighbors,
+            score_validate_scale = score_validate_scale,
+                                  )
         self.C = C
         
     def fit(self,X, y = None):

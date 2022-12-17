@@ -75,7 +75,7 @@ extensions = [
 
 
 
-with open('requirements.txt') as inn:
+with open('./requirements.txt') as inn:
     requirements = inn.read().splitlines()
 
 setup(
