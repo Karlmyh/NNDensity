@@ -1,1 +1,4 @@
 include requirements.txt
+global-include *.pyx
+global-include *.pxd
+global-include *.pxi

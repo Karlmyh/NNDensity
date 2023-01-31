@@ -1,3 +1,6 @@
+from setuptools import dist
+dist.Distribution().fetch_build_eggs(['Cython>=0.29.31', 'numpy>=1.10'])
+
 from setuptools import find_packages
 from numpy.distutils.core import setup
 from setuptools.extension import Extension
@@ -44,32 +47,33 @@ class build_ext_subclass(build_ext):
 
         build_ext.build_extensions(self)
 
-cmdclass={"build_ext":build_ext_subclass}
+cmdclass = {"build_ext":build_ext_subclass}
 
-if os.name=="posix":
-    libraries=["m"]
+if os.name == "posix":
+    libraries = ["m"]
 else:
-    libraries=[]
+    libraries = []
 
-ext_module_partition_nodes = Extension("NNDensity._partition_nodes", sources=["./NNDensity/_partition_nodes.pyx"],
-          include_dirs=[numpy.get_include()], 
-          language="c++",
-          libraries=libraries,
+ext_module_partition_nodes = Extension("NNDensity._partition_nodes", 
+          sources = ["./NNDensity/_partition_nodes.pyx"],
+          include_dirs = [numpy.get_include()], 
+          language = "c++",
+          libraries = libraries,
           )
 
 
 
 ext_module_kd_tree = Extension("NNDensity._kd_tree", 
-           sources=["./NNDensity/_kd_tree.pyx"], 
-           include_dirs=[numpy.get_include()],
-           libraries=libraries,
+           sources = ["./NNDensity/_kd_tree.pyx"], 
+           include_dirs = [numpy.get_include()],
+           libraries = libraries,
            )
 
 
 
 extensions = [
-    ext_module_partition_nodes,
     ext_module_kd_tree,
+    ext_module_partition_nodes,
 ]
 
 
@@ -79,29 +83,34 @@ with open('./requirements.txt') as inn:
     requirements = inn.read().splitlines()
 
 setup(
-    name='NNDensity',
+    name = 'NNDensity',
 
-    version='0.0.2',
-
-    packages=find_packages(),
+    version = '0.0.5',
     
-    ext_modules=cythonize(extensions),
+    ext_modules = cythonize(extensions),
 
-    description='Nearest Neighbor Density Estimation',
+    description = 'Nearest Neighbor Density Estimation',
 
-    long_description=long_description,
+    long_description = long_description,
 
-    long_description_content_type="text/markdown",
+    long_description_content_type = "text/markdown",
 
-    url='https://github.com/Karlmyh/NNDensity',
+    url = 'https://github.com/Karlmyh/NNDensity',
 
-    author="Yuheng Ma",
+    author = "Yuheng Ma",
 
-    author_email="yma@ruc.edu.cn",
+    author_email = "yma@ruc.edu.cn",
 
-    python_requires='>=3',
+    python_requires = '>=3',
     
-    install_requires=requirements,
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License"
+    ],
     
-    cmdclass=cmdclass
+    packages = find_packages(),
+    
+    install_requires = requirements,
+    
+    cmdclass = cmdclass
 )
