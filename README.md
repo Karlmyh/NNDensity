@@ -36,7 +36,7 @@ pip install git+https://github.com/Karlmyh/NNDensity.git
 
 
 ### Mannul Install
-  > 
+
 ```bash
 git clone git@github.com:Karlmyh/NNDensity.git
 cd NNDensity 
