@@ -10,10 +10,6 @@ authors:
     orcid: 0000-0001-8369-9408
     affiliation: 1
     
-  - name: Yuchao Cai
-    orcid: 
-    affiliation: 1
-    
   - name: Shaoxin Ye
     orcid: 0000-0002-6555-2354
     affiliation: 1
@@ -21,7 +17,7 @@ authors:
 affiliations:
  - name: School of Statistics, Renmin University of China
    index: 1
-date: 2022 November 2
+date: 2023 Augest 11
 bibliography: paper.bib
 
 ---
